@@ -16,10 +16,9 @@ cp "$REPO/FABLE_PLAYBOOK.md" "$CLAUDE/FABLE_PLAYBOOK.md"
 echo "→ fable system prompt"
 cp "$REPO/fable-system.md" "$CLAUDE/fable-system.md"
 
-echo "→ skills + agent"
-cp -R "$REPO/skills/ground"                  "$CLAUDE/skills/"
-cp -R "$REPO/skills/claude-design-patterns"  "$CLAUDE/skills/"
-cp    "$REPO/agents/grounding-verifier.md"   "$CLAUDE/agents/"
+echo "→ skills (all bundled) + agent"
+for d in "$REPO"/skills/*/; do cp -R "$d" "$CLAUDE/skills/"; done
+cp "$REPO/agents/grounding-verifier.md" "$CLAUDE/agents/"
 
 echo "→ launcher (~/.zshrc)"
 if ! grep -q 'fable()' "$HOME/.zshrc" 2>/dev/null; then
