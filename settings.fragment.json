@@ -1,0 +1,21 @@
+{
+  "_comment": "Merge these into ~/.claude/settings.json (install.sh does this for you, with a backup). $HOME expands at hook-run time.",
+  "alwaysThinkingEnabled": true,
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/fable-trigger.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/test-after-edit.py" }
+        ]
+      }
+    ]
+  }
+}
