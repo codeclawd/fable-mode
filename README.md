@@ -12,8 +12,10 @@ The Mythos-class model the U.S. government pulled after three days — brought b
 
 One clone, one install: the leaked **Claude Fable 5** system prompt + a measured execution playbook + verification hooks + design and agent skills — wired into Claude Code.
 
+<!-- Hero image: add docs/before-after.png (stock Opus 4.8 vs. fable-mode, same prompt) then uncomment:
 <img src="docs/before-after.png" alt="Same prompt, same model — stock Opus 4.8 vs. Opus 4.8 in fable-mode" width="100%">
 <sub>Same prompt, same model. Left: stock Opus 4.8. Right: Opus 4.8 in fable-mode.</sub>
+-->
 
 </div>
 
