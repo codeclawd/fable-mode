@@ -18,7 +18,7 @@ import re
 import os
 import tempfile
 
-PLAYBOOK = "/Users/ak/FABLE_PLAYBOOK.md"
+PLAYBOOK = os.path.expanduser(os.path.join("~", ".claude", "FABLE_PLAYBOOK.md"))
 TRIGGER = re.compile(r"\b(use fable|fable mode|load fable)\b", re.I)
 HEAVY_EFFORT = {"xhigh", "max", "ultracode"}
 

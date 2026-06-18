@@ -6,7 +6,7 @@
 # so it's set via --settings, not --effort. It also trips fable-trigger.py, which
 # layers FABLE_PLAYBOOK execution discipline on top.
 #
-# Supply your own ~/.claude/fable-system.md first (see fable-system.md.example).
+# install.sh copies fable-system.md into ~/.claude for you.
 # If ultracode's auto-workflows burn too many tokens, swap --settings for --effort xhigh.
 fable() {
   claude --append-system-prompt-file "$HOME/.claude/fable-system.md" --settings '{"ultracode": true}' "$@"

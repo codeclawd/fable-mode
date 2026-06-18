@@ -18,18 +18,20 @@ import sys
 import os
 import json
 import time
+import shutil
 import hashlib
 import tempfile
 import subprocess
 
 DEBOUNCE = int(os.environ.get("FABLE_TEST_HOOK_DEBOUNCE", "45"))
 TIMEOUT = int(os.environ.get("FABLE_TEST_HOOK_TIMEOUT", "90"))
+IS_WINDOWS = os.name == "nt"
 
 # File types that should never trigger a test run (docs, data, config, assets).
 SKIP_EXT = {
     ".md", ".markdown", ".txt", ".rst", ".json", ".jsonc", ".lock", ".yaml",
     ".yml", ".toml", ".ini", ".cfg", ".csv", ".tsv", ".svg", ".png", ".jpg",
-    ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".lockb",
+    ".jpeg", ".gif", ".webp", ".ico", ".pdf",
 }
 
 
@@ -132,10 +134,25 @@ def main():
     if debounced(root):
         return
 
+    # On Windows the interpreter path may contain spaces and several runners
+    # (npm/pnpm/yarn/make) are .cmd shims that can't be exec'd directly — use the
+    # bare interpreter name and let cmd.exe resolve it via PATHEXT under shell=True.
+    prog = cmd[0]
+    if IS_WINDOWS and prog == sys.executable:
+        prog = "python"
+    if not shutil.which(prog):
+        return  # runner not installed — silent
+    run_args = [prog] + cmd[1:]
+
     t0 = time.time()
     try:
-        p = subprocess.run(cmd, cwd=root, capture_output=True, text=True,
-                           timeout=TIMEOUT)
+        if IS_WINDOWS:
+            # tokens are bare (no spaces), so a plain join is unambiguous for cmd.exe
+            p = subprocess.run(" ".join(run_args), cwd=root, capture_output=True,
+                               text=True, timeout=TIMEOUT, shell=True)
+        else:
+            p = subprocess.run(run_args, cwd=root, capture_output=True, text=True,
+                               timeout=TIMEOUT)
     except subprocess.TimeoutExpired:
         emit(f"test-after-edit ⏱ — `{label}` exceeded {TIMEOUT}s in {root}; "
              "result inconclusive, run it manually before claiming done.")
