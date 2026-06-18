@@ -1,0 +1,20 @@
+# Normalize line endings so the cross-platform scripts stay runnable everywhere.
+* text=auto eol=lf
+
+# Shell scripts MUST stay LF even on a Windows checkout — a CRLF in the shebang
+# line breaks them under Git Bash ("/usr/bin/env bash^M: bad interpreter").
+*.sh    text eol=lf
+*.py    text eol=lf
+*.zsh   text eol=lf
+
+# PowerShell is happiest with CRLF on Windows.
+*.ps1   text eol=crlf
+
+# Binary assets — never normalize or diff.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
