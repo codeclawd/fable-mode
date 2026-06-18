@@ -80,6 +80,10 @@ This gives you Fable's *disposition*, not its raw capability. Reasoning depth, v
 
 Made by HalalifyMusic — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work.
 
+## Contributing
+
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup and conventions, [SECURITY.md](SECURITY.md) for the security model (the hooks run code on your machine), and [CHANGELOG.md](CHANGELOG.md) for the running history.
+
 ## License
 
 MIT on the original code (see `LICENSE`). The bundled Fable system prompt and the Anthropic skills carry their own terms.
