@@ -5,6 +5,7 @@
 **Run Claude Fable 5 on Opus 4.8.**
 The Mythos-class model the U.S. government pulled after three days — brought back as a system prompt.
 
+![CI](https://github.com/HalalifyMusic/fable-mode/actions/workflows/ci.yml/badge.svg) &nbsp;
 ![Stars](https://img.shields.io/github/stars/HalalifyMusic/fable-mode?style=social) &nbsp;
 ![License](https://img.shields.io/badge/license-MIT-blue) &nbsp;
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Opus%204.8-d97757) &nbsp;
@@ -27,14 +28,35 @@ But when its system prompt leaked, people noticed: a lot of what made Fable *fee
 
 ## Quickstart
 
+One installer, every OS — it's Python (already required by the hooks), so the same command works on Windows, macOS, and Linux:
+
 ```sh
 git clone https://github.com/HalalifyMusic/fable-mode
-cd fable-mode && ./install.sh
-source ~/.zshrc
+cd fable-mode
+python install.py        # Windows  (use python3 on macOS / Linux)
+```
+
+Then reload your shell and launch:
+
+```sh
 fable        # Opus 4.8 + Fable prompt + ultracode
 ```
 
-`install.sh` copies everything into `~/.claude`, adds the `fable` launcher, and merges your settings (with a backup). No model switch, no API key — it runs on the Opus 4.8 you already have.
+Prefer a native one-liner? `./install.sh` (macOS / Linux) and `.\install.ps1` (Windows) just locate Python and run `install.py` for you.
+
+**Reload after install:** `source ~/.zshrc` (or `~/.bashrc`) on Unix; `. $PROFILE` in PowerShell on Windows.
+
+> **Requirements:** Python on PATH (`python --version`) for the hooks, and Claude Code installed for the `fable` launcher. On Windows, if `.\install.ps1` is blocked by execution policy, run `python install.py` directly (no policy needed).
+
+The installer copies everything into `~/.claude`, adds the `fable` launcher (to your shell rc on Unix, to your PowerShell `$PROFILE` on Windows), and merges your settings (with a backup) — writing the absolute interpreter and hook paths so the hooks fire on every platform. Idempotent: safe to re-run. Needs Python ≥ 3.9 (the hooks are stdlib-only — no pip installs). No model switch, no API key — it runs on the Opus 4.8 you already have.
+
+## Uninstall
+
+```sh
+python uninstall.py        # Windows  (python3 on macOS / Linux; or ./uninstall.sh, .\uninstall.ps1)
+```
+
+Removes the bundled files from `~/.claude`, strips the `fable` launcher line, and drops the two Fable hooks from `settings.json` (writing a fresh backup). It's surgical — your own skills, unrelated hooks, and `alwaysThinkingEnabled` are left untouched.
 
 ## What's in the bundle
 
@@ -43,7 +65,7 @@ fable        # Opus 4.8 + Fable prompt + ultracode
 - **Hooks** — `fable-trigger.py` injects the playbook at `xhigh`/`max`/`ultracode`; `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
 - **`/ground` skill + `grounding-verifier` agent** — a self-terminating grounding loop and a cold verifier that assumes every claim is wrong until the live code proves it.
 - **Skills** — `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
-- **`fable()` launcher** — Opus 4.8 + the prompt + `ultracode` effort.
+- **`fable` launcher** — Opus 4.8 + the prompt + `ultracode` effort (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell).
 
 ## The honest ceiling
 
@@ -56,7 +78,11 @@ This gives you Fable's *disposition*, not its raw capability. Reasoning depth, v
 
 ## Credits
 
-Made by me — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work.
+Made by HalalifyMusic — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work.
+
+## Contributing
+
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup and conventions, [SECURITY.md](SECURITY.md) for the security model (the hooks run code on your machine), and [CHANGELOG.md](CHANGELOG.md) for the running history.
 
 ## License
 
