@@ -53,6 +53,8 @@ CORE_FILES = [
     "ultracode.settings.json",
     os.path.join("hooks", "fable-trigger.py"),
     os.path.join("hooks", "test-after-edit.py"),
+    os.path.join("shell", "fable.ps1"),
+    os.path.join("shell", "fable.zsh"),
     os.path.join("skills", "fable", "SKILL.md"),
     os.path.join("agents", "grounding-verifier.md"),
 ]
@@ -68,22 +70,31 @@ def check_files():
 
 
 def check_settings():
+    """Hooks may live in settings.json (where install.py puts them) or in
+    settings.local.json (a legitimate hand-managed location) — accept both."""
     path = os.path.join(CLAUDE, "settings.json")
     if not os.path.isfile(path):
         fail("settings.json missing (re-run install.py)")
         return
     try:
         with open(path, encoding="utf-8") as f:
-            d = json.load(f)
+            docs = [json.load(f)]
     except Exception as e:
         fail("settings.json unreadable: {}".format(e))
         return
-    hooks = d.get("hooks", {})
+    local = os.path.join(CLAUDE, "settings.local.json")
+    if os.path.isfile(local):
+        try:
+            with open(local, encoding="utf-8") as f:
+                docs.append(json.load(f))
+        except Exception as e:
+            warn("settings.local.json unreadable: {}".format(e))
     for event, needle in (("SessionStart", "fable-trigger.py"),
                           ("UserPromptSubmit", "fable-trigger.py"),
                           ("PostToolUse", "test-after-edit.py")):
-        cmds = [h.get("command", "") for e in hooks.get(event, [])
-                for h in e.get("hooks", [])]
+        cmds = [h.get("command", "") for d in docs
+                for ent in d.get("hooks", {}).get(event, [])
+                for h in ent.get("hooks", [])]
         hit = next((c for c in cmds if needle in c), None)
         if not hit:
             fail("{} not registered for {} (re-run install.py)".format(needle, event))
@@ -93,8 +104,64 @@ def check_settings():
         interp = m.group(1) if m else hit.split()[0]
         if not (os.path.isfile(interp) or shutil.which(interp)):
             fail("hook interpreter not found: " + interp)
-    if d.get("alwaysThinkingEnabled") is not True:
+    if not any(d.get("alwaysThinkingEnabled") is True for d in docs):
         warn("alwaysThinkingEnabled is off - reasoning-density lever missing")
+
+
+def launcher_profile_candidates():
+    """Shell startup files that may carry the fable launcher line. Static
+    defaults always; live $PROFILE queries only when CLI probes are allowed
+    (they spawn a shell, and profiles can live in redirected Documents)."""
+    docs = os.path.join(HOME, "Documents")
+    cands = [
+        os.path.join(docs, "PowerShell", "Microsoft.PowerShell_profile.ps1"),
+        os.path.join(docs, "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1"),
+        os.path.join(HOME, ".zshrc"),
+        os.path.join(HOME, ".bashrc"),
+    ]
+    if os.environ.get("FABLE_DOCTOR_SKIP_CLI") != "1":
+        for exe in ("pwsh", "powershell"):
+            if shutil.which(exe):
+                try:
+                    out = subprocess.run([exe, "-NoProfile", "-Command", "$PROFILE"],
+                                         capture_output=True, text=True, timeout=20)
+                    p = out.stdout.strip()
+                    if p and p not in cands:
+                        cands.append(p)
+                except Exception:
+                    pass
+    return cands
+
+
+def check_launcher():
+    """The most fragile link: a profile line sourcing a launcher file that no
+    longer exists breaks every new shell — that is a hard failure. No line at
+    all is only a warning (/fable and auto-activation work without it)."""
+    found = False
+    for path in launcher_profile_candidates():
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+        for line in lines:
+            if ("fable.ps1" not in line and "fable.zsh" not in line) \
+                    or line.lstrip().startswith("#"):
+                continue
+            found = True
+            m = re.search(r'["\']([^"\']*fable\.(?:ps1|zsh))["\']', line)
+            target = os.path.expanduser(m.group(1)) if m else None
+            if target and os.path.isfile(target):
+                ok("launcher registered in {}".format(path))
+            else:
+                fail("launcher line in {} points to a missing file "
+                     "(re-run install.py): {}".format(path, line.strip()))
+    if not found:
+        warn("no `fable` launcher line found in a shell profile - the `fable` "
+             "command won't exist; /fable and auto-activation still work "
+             "(re-run install.py to add it)")
 
 
 def check_claude_cli():
@@ -121,6 +188,20 @@ def check_claude_cli():
     else:
         warn("claude {} < 2.1.199: effort not exposed to hooks; "
              "phrase/FABLE_MODE/SessionStart paths unaffected".format(label))
+    try:
+        help_out = subprocess.run(["claude", "--help"], capture_output=True,
+                                  text=True, timeout=30).stdout
+    except Exception:
+        help_out = ""
+    for flag in ("--effort", "--append-system-prompt-file"):
+        variants = [flag]
+        if flag.endswith("-file"):
+            # the CLI lists file variants as a shorthand family, e.g.
+            # "--append-system-prompt[-file]"
+            variants.append(flag[:-len("-file")] + "[-file]")
+        if not any(v in help_out for v in variants):
+            warn("claude --help does not list {} - the fable launcher may fail "
+                 "on this CLI version".format(flag))
 
 
 def _fire(payload, env_extra):
@@ -185,6 +266,7 @@ def main():
     check_python()
     check_files()
     check_settings()
+    check_launcher()
     check_claude_cli()
     check_live_fire()
     check_evidence()
