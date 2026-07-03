@@ -3,6 +3,8 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
+import time
 import uuid
 from pathlib import Path
 
@@ -156,3 +158,88 @@ def test_simple_greeting_stays_silent(tmp_path):
                 "session_id": str(uuid.uuid4())}, home) == ""
     assert run({"prompt": "what time is it",
                 "session_id": str(uuid.uuid4())}, home) == ""
+
+
+def test_compact_reinjects_without_fable_mode(tmp_path):
+    """Auto/effort-activated sessions lose the playbook on compaction; the
+    session marker is the proof the mode was active, so compact must re-inject
+    even when the launcher (FABLE_MODE) is not involved."""
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    first = run({"prompt": "hi", "effort": "xhigh", "session_id": sid}, home)
+    assert first, "heavy effort should inject"
+    compact = run({"hook_event_name": "SessionStart", "source": "compact",
+                   "session_id": sid}, home)
+    assert compact, "compaction wiped an activated session, must re-inject"
+    payload = json.loads(compact)["hookSpecificOutput"]
+    assert payload["hookEventName"] == "SessionStart"
+    assert "PLAYBOOK_MARKER_42" in payload["additionalContext"]
+
+
+def test_compact_without_prior_activation_is_silent(tmp_path):
+    home = make_home(tmp_path)
+    out = run({"hook_event_name": "SessionStart", "source": "compact",
+               "session_id": str(uuid.uuid4())}, home)
+    assert out == "", "no marker, no FABLE_MODE - nothing to restore"
+
+
+def test_clear_rearms_the_once_per_session_paths(tmp_path):
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    first = run({"prompt": "hi", "effort": "xhigh", "session_id": sid}, home)
+    cleared = run({"hook_event_name": "SessionStart", "source": "clear",
+                   "session_id": sid}, home)
+    again = run({"prompt": "hi", "effort": "xhigh", "session_id": sid}, home)
+    assert first, "heavy effort should inject"
+    assert cleared == "", "clear itself injects nothing without the launcher"
+    assert again, "context was wiped by /clear - the once-per-session guard must re-arm"
+
+
+def test_transcript_activation_suppresses_reinjection(tmp_path):
+    """If the /fable skill already activated this session (its confirmation
+    line is in the transcript), the heavy path must not inject a duplicate."""
+    home = make_home(tmp_path)
+    transcript = tmp_path / "transcript.jsonl"
+    transcript.write_text(
+        '{"text": "Fable mode active — playbook and behavior layer loaded."}\n',
+        encoding="utf-8")
+    out = run({"prompt": "hi", "effort": "xhigh",
+               "session_id": str(uuid.uuid4()),
+               "transcript_path": str(transcript)}, home)
+    assert out == "", "session already activated via /fable - no duplicate playbook"
+
+
+def test_phrase_overrides_transcript_suppression(tmp_path):
+    """An explicit trigger phrase is intent (e.g. re-saying it after a
+    compaction) and must always inject, transcript or not."""
+    home = make_home(tmp_path)
+    transcript = tmp_path / "transcript.jsonl"
+    transcript.write_text('{"text": "Fable mode active"}\n', encoding="utf-8")
+    out = run({"prompt": "use fable", "session_id": str(uuid.uuid4()),
+               "transcript_path": str(transcript)}, home)
+    assert out, "explicit phrase must always inject"
+
+
+def test_en_update_deploy_prompt_auto_injects(tmp_path):
+    home = make_home(tmp_path)
+    out = run({"prompt": "Update the dependency pins and deploy the staging service",
+               "session_id": str(uuid.uuid4())}, home)
+    assert out, "update/deploy are task verbs and should trip the heuristic"
+
+
+def test_ru_update_prompt_auto_injects(tmp_path):
+    home = make_home(tmp_path)
+    out = run({"prompt": "Обнови зависимости и запусти тесты, когда закончишь",
+               "session_id": str(uuid.uuid4())}, home)
+    assert out, "обнови/запусти are task verbs and should trip the heuristic"
+
+
+def test_stale_loaded_markers_are_pruned(tmp_path):
+    home = make_home(tmp_path)
+    stale = Path(tempfile.gettempdir()) / ("fable-loaded-stale-" + uuid.uuid4().hex)
+    stale.touch()
+    old = time.time() - 8 * 86400
+    os.utime(stale, (old, old))
+    assert run({"prompt": "hi", "effort": "xhigh",
+                "session_id": str(uuid.uuid4())}, home)
+    assert not stale.exists(), "markers older than a week should be pruned"
