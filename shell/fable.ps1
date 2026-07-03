@@ -1,5 +1,7 @@
-# Fable mode launcher (PowerShell). Dot-source from your profile, or:
-#   . C:\path\to\fable-mode\shell\fable.ps1
+# Fable mode launcher (PowerShell). install.py copies this file to
+# ~\.claude\shell\fable.ps1 and dot-sources it from your $PROFILE, so the
+# cloned repo can be moved or deleted after install. Manual use:
+#   . $HOME\.claude\shell\fable.ps1
 #
 # `fable`          Claude Code pinned to Opus 4.8, Fable Claude-Code behavior
 #                  layer appended, xhigh effort, FABLE_MODE=1 declared so
@@ -7,12 +9,19 @@
 # `fable --ultra`  Same, plus ultracode: the harness auto-runs multi-agent
 #                  workflows for substantive tasks (heavy on tokens).
 # `fable doctor`   Verify the whole install/activation chain mechanically.
-#
-# install.ps1 copies fable-code.md and fable-doctor.py into ~\.claude for you.
 function fable {
     $rest = @($args)
     if ($rest.Count -gt 0 -and $rest[0] -eq 'doctor') {
-        & python "$HOME\.claude\hooks\fable-doctor.py" @($rest | Select-Object -Skip 1)
+        # Not every Windows box has `python` on PATH; try the common launchers.
+        $py = $null
+        foreach ($cand in 'python', 'py', 'python3') {
+            if (Get-Command $cand -ErrorAction SilentlyContinue) { $py = $cand; break }
+        }
+        if (-not $py) {
+            Write-Error 'Python not found on PATH - cannot run fable doctor.'
+            return
+        }
+        & $py "$HOME\.claude\hooks\fable-doctor.py" @($rest | Select-Object -Skip 1)
         return
     }
     $extra = @()

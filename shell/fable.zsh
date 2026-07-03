@@ -1,4 +1,6 @@
-# Fable mode launcher. Add to ~/.zshrc, or: `source ~/path/to/fable-mode/shell/fable.zsh`
+# Fable mode launcher. install.py copies this file to ~/.claude/shell/fable.zsh
+# and sources it from your shell rc, so the cloned repo can be moved or deleted
+# after install. Manual use: `source ~/.claude/shell/fable.zsh`
 #
 # `fable`          Claude Code pinned to Opus 4.8, Fable Claude-Code behavior
 #                  layer appended, xhigh effort, FABLE_MODE=1 declared so
@@ -6,8 +8,6 @@
 # `fable --ultra`  Same, plus ultracode: the harness auto-runs multi-agent
 #                  workflows for substantive tasks (heavy on tokens).
 # `fable doctor`   Verify the whole install/activation chain mechanically.
-#
-# install.py copies fable-code.md and fable-doctor.py into ~/.claude for you.
 fable() {
   if [[ "$1" == "doctor" ]]; then
     shift

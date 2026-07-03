@@ -22,6 +22,7 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 HOME = os.path.expanduser("~")
 CLAUDE = os.path.join(HOME, ".claude")
 IS_WINDOWS = os.name == "nt"
+BUNDLED_MARKER = ".fable-mode-bundled"
 
 
 def rm_file(path):
@@ -30,10 +31,16 @@ def rm_file(path):
         print("  removed " + path)
 
 
-def rm_tree(path):
-    if os.path.isdir(path):
+def rm_skill(path):
+    """Remove a skill directory only if install.py marked it as ours. A
+    same-named directory without the marker is the user's own work."""
+    if not os.path.isdir(path):
+        return
+    if os.path.isfile(os.path.join(path, BUNDLED_MARKER)):
         shutil.rmtree(path)
         print("  removed " + path)
+    else:
+        print("  left {} in place (not installed by fable-mode)".format(path))
 
 
 def bundled_skill_names():
@@ -66,25 +73,30 @@ def strip_launcher(path, marker):
         print("  removed launcher from " + path)
 
 
-def powershell_profile_path():
+def powershell_profile_paths():
+    """$PROFILE of every PowerShell present — install.py writes to each."""
     import subprocess
+    paths = []
     for exe in ("pwsh", "powershell"):
         if shutil.which(exe):
             try:
                 out = subprocess.run([exe, "-NoProfile", "-Command", "$PROFILE"],
                                      capture_output=True, text=True, timeout=20)
                 p = out.stdout.strip()
-                if p:
-                    return p
+                if p and p not in paths:
+                    paths.append(p)
             except Exception:
                 pass
-    return os.path.join(HOME, "Documents", "PowerShell",
-                        "Microsoft.PowerShell_profile.ps1")
+    if not paths:
+        paths.append(os.path.join(HOME, "Documents", "PowerShell",
+                                  "Microsoft.PowerShell_profile.ps1"))
+    return paths
 
 
 def remove_launcher():
     if IS_WINDOWS:
-        strip_launcher(powershell_profile_path(), "fable.ps1")
+        for profile in powershell_profile_paths():
+            strip_launcher(profile, "fable.ps1")
     else:
         for rc in (".zshrc", ".bashrc"):
             strip_launcher(os.path.join(HOME, rc), "fable.zsh")
@@ -138,8 +150,14 @@ def main():
     rm_file(os.path.join(CLAUDE, "fable-code.md"))
     rm_file(os.path.join(CLAUDE, "ultracode.settings.json"))
     rm_file(os.path.join(CLAUDE, "agents", "grounding-verifier.md"))
+    rm_file(os.path.join(CLAUDE, "shell", "fable.ps1"))
+    rm_file(os.path.join(CLAUDE, "shell", "fable.zsh"))
+    try:
+        os.rmdir(os.path.join(CLAUDE, "shell"))
+    except OSError:
+        pass  # not empty or absent — leave it
     for name in bundled_skill_names():
-        rm_tree(os.path.join(CLAUDE, "skills", name))
+        rm_skill(os.path.join(CLAUDE, "skills", name))
 
     print("-> launcher")
     remove_launcher()

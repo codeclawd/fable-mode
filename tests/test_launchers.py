@@ -27,6 +27,14 @@ def test_launchers_pass_no_inline_json():
         assert "ultracode.settings.json" in text, f"{name} should use the settings file"
 
 
+def test_ps1_doctor_resolves_python_fallback():
+    """`python` isn't guaranteed on Windows PATH — the doctor subcommand must
+    fall back across the common launcher names instead of failing outright."""
+    text = (REPO / "shell" / "fable.ps1").read_text(encoding="utf-8")
+    for cand in ("'python'", "'py'", "'python3'"):
+        assert cand in text, f"fable doctor should try {cand} on PATH"
+
+
 @pytest.mark.skipif(os.name != "nt" or not shutil.which("powershell"),
                     reason="Windows PowerShell 5.1 only exists on Windows; on "
                            "macOS/Linux runners `powershell` is just pwsh")

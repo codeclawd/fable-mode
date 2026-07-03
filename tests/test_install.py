@@ -25,7 +25,7 @@ def sandbox(tmp_path, windows):
     inst.CLAUDE = str(tmp_path / ".claude")
     inst.IS_WINDOWS = windows
     inst._profile = tmp_path / "profile.ps1"
-    inst.powershell_profile_path = lambda: str(inst._profile)
+    inst.powershell_profile_paths = lambda: [str(inst._profile)]
     return inst
 
 
@@ -77,4 +77,53 @@ def test_install_unix_launcher(tmp_path, monkeypatch):
     inst.main()
     rc = tmp_path / ".zshrc"
     assert rc.is_file()
-    assert "fable.zsh" in rc.read_text(encoding="utf-8")
+    text = rc.read_text(encoding="utf-8")
+    # sourced from the stable ~/.claude copy, not from the (deletable) clone
+    assert str(tmp_path / ".claude" / "shell" / "fable.zsh") in text
+    assert str(REPO) not in text
+
+
+def test_launcher_sourced_from_claude_not_repo(tmp_path):
+    """The clone is deletable after install: the profile must reference the
+    copy under ~/.claude, never the checkout path."""
+    inst = sandbox(tmp_path, windows=True)
+    inst.main()
+    claude = tmp_path / ".claude"
+    assert (claude / "shell" / "fable.ps1").is_file()
+    assert (claude / "shell" / "fable.zsh").is_file()
+    profile = (tmp_path / "profile.ps1").read_text(encoding="utf-8")
+    assert str(claude / "shell" / "fable.ps1") in profile
+    assert str(REPO) not in profile
+
+
+def test_stale_launcher_line_is_replaced(tmp_path):
+    """Re-installing from a new clone path must fix a profile line that points
+    at the old location, not silently keep it."""
+    inst = sandbox(tmp_path, windows=True)
+    profile = tmp_path / "profile.ps1"
+    profile.write_text(
+        '\n# Fable mode (added by fable-mode/install.py)\n'
+        '. "C:\\old-clone\\shell\\fable.ps1"\n', encoding="utf-8")
+    inst.main()
+    text = profile.read_text(encoding="utf-8")
+    assert "old-clone" not in text
+    assert text.count("fable.ps1") == 1
+    assert str(tmp_path / ".claude" / "shell" / "fable.ps1") in text
+
+
+def test_preexisting_user_skill_is_backed_up(tmp_path):
+    """A skills/<name> dir that fable-mode did not install is the user's own
+    work - it must be preserved, not rmtree'd."""
+    inst = sandbox(tmp_path, windows=True)
+    mine = tmp_path / ".claude" / "skills" / "webapp-testing"
+    mine.mkdir(parents=True)
+    (mine / "SKILL.md").write_text("MY CUSTOM VERSION", encoding="utf-8")
+    inst.main()
+    bak = tmp_path / ".claude" / "backups" / "skills" / "webapp-testing"
+    assert (bak / "SKILL.md").read_text(encoding="utf-8") == "MY CUSTOM VERSION"
+    installed = tmp_path / ".claude" / "skills" / "webapp-testing"
+    assert (installed / ".fable-mode-bundled").is_file()
+    assert "MY CUSTOM" not in (installed / "SKILL.md").read_text(encoding="utf-8")
+    # a re-run must not clobber the preserved backup with our own copy
+    inst.main()
+    assert (bak / "SKILL.md").read_text(encoding="utf-8") == "MY CUSTOM VERSION"
