@@ -25,6 +25,7 @@ Per-project knob (file):
                               the hook doesn't run the whole suite on every edit.
 """
 import sys
+import glob
 import os
 import json
 import time
@@ -152,8 +153,21 @@ def find_root_and_cmd(start_dir):
         d = parent
 
 
+def prune_stale_markers():
+    """Best-effort GC: week-old debounce stamps belong to dead sessions.
+    Windows never clears %TEMP%, so without this they accumulate forever."""
+    cutoff = time.time() - 7 * 86400
+    for p in glob.glob(os.path.join(tempfile.gettempdir(), "fable-testhook-*")):
+        try:
+            if os.path.getmtime(p) < cutoff:
+                os.remove(p)
+        except OSError:
+            pass
+
+
 def debounced(root):
     """True if we ran for this root within DEBOUNCE seconds; else stamp and return False."""
+    prune_stale_markers()
     h = hashlib.sha1(root.encode()).hexdigest()[:16]
     marker = os.path.join(tempfile.gettempdir(), f"fable-testhook-{h}")
     now = time.time()
@@ -176,6 +190,10 @@ def main():
 
     if data.get("tool_name") not in ("Edit", "Write", "MultiEdit"):
         return
+
+    resp = data.get("tool_response")
+    if isinstance(resp, dict) and resp.get("success") is False:
+        return  # the edit itself failed; nothing new on disk to test
 
     ti = data.get("tool_input") or {}
     fpath = ti.get("file_path") or ti.get("path") or ""
