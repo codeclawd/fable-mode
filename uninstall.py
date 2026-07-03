@@ -132,6 +132,7 @@ def main():
     print("-> files in ~/.claude")
     rm_file(os.path.join(CLAUDE, "hooks", "fable-trigger.py"))
     rm_file(os.path.join(CLAUDE, "hooks", "test-after-edit.py"))
+    rm_file(os.path.join(CLAUDE, "hooks", "fable-doctor.py"))
     rm_file(os.path.join(CLAUDE, "FABLE_PLAYBOOK.md"))
     rm_file(os.path.join(CLAUDE, "fable-system.md"))
     rm_file(os.path.join(CLAUDE, "fable-code.md"))

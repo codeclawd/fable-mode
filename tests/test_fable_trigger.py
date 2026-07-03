@@ -16,6 +16,7 @@ def run(stdin_obj, home, extra_env=None):
     env["USERPROFILE"] = str(home)   # expanduser on Windows
     env.pop("CLAUDE_EFFORT", None)   # effort is driven by the payload, not the dev's session
     env.pop("FABLE_MODE", None)      # ditto for the launcher flag
+    env.pop("FABLE_AUTO", None)      # and the auto-heuristic knob
     if extra_env:
         env.update(extra_env)
     p = subprocess.run([sys.executable, str(HOOK)],
@@ -128,3 +129,30 @@ def test_effort_level_dict_payload_injects(tmp_path):
                "session_id": str(uuid.uuid4())}, home)
     assert out, "effort.level dict form (documented payload) should inject"
 
+
+def test_complex_prompt_auto_injects_once(tmp_path):
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    prompt = "Сделай рефакторинг hooks/fable-trigger.py и добавь тесты, затем обнови README"
+    first = run({"prompt": prompt, "session_id": sid}, home)
+    second = run({"prompt": prompt, "session_id": sid}, home)
+    assert first, "task-shaped prompt should auto-inject"
+    ctx = json.loads(first)["hookSpecificOutput"]["additionalContext"]
+    assert "Fable mode active (auto)" in ctx
+    assert second == "", "auto path is once per session"
+
+
+def test_fable_auto_opt_out(tmp_path):
+    home = make_home(tmp_path)
+    prompt = "Implement a REST endpoint in api/server.py and fix the failing tests"
+    out = run({"prompt": prompt, "session_id": str(uuid.uuid4())}, home,
+              extra_env={"FABLE_AUTO": "0"})
+    assert out == "", "FABLE_AUTO=0 must disable the heuristic"
+
+
+def test_simple_greeting_stays_silent(tmp_path):
+    home = make_home(tmp_path)
+    assert run({"prompt": "привет, как дела?",
+                "session_id": str(uuid.uuid4())}, home) == ""
+    assert run({"prompt": "what time is it",
+                "session_id": str(uuid.uuid4())}, home) == ""

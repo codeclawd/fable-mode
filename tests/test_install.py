@@ -40,6 +40,7 @@ def test_install_copies_everything(tmp_path):
     assert (claude / "skills" / "fable" / "SKILL.md").is_file()
     assert (claude / "hooks" / "fable-trigger.py").is_file()
     assert (claude / "hooks" / "test-after-edit.py").is_file()
+    assert (claude / "hooks" / "fable-doctor.py").is_file()
     assert (claude / "agents" / "grounding-verifier.md").is_file()
     assert (claude / "skills" / "ground" / "SKILL.md").is_file()
     # nested skill content must survive the copy

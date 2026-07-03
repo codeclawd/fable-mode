@@ -94,6 +94,7 @@ def main():
     print("-> hooks")
     copy_into("hooks/fable-trigger.py", os.path.join(CLAUDE, "hooks"))
     copy_into("hooks/test-after-edit.py", os.path.join(CLAUDE, "hooks"))
+    copy_into("hooks/fable-doctor.py", os.path.join(CLAUDE, "hooks"))
 
     print("-> playbook")
     copy_into("FABLE_PLAYBOOK.md", CLAUDE)

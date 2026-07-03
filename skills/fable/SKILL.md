@@ -1,6 +1,6 @@
 ---
 name: fable
-description: Activate Fable mode - adopt the Fable execution playbook and the Claude Code behavior layer as standing discipline for this session. Use when the user types /fable, says "fable mode", "use fable", "work like fable", or asks for maximum-discipline execution.
+description: Activate Fable mode - adopt the Fable execution playbook and the Claude Code behavior layer as standing discipline for this session. Use when the user types /fable, says "fable mode", "use fable", "work like fable", or asks for maximum-discipline execution - and PROACTIVELY at the start of any non-trivial engineering task (multi-step implementation, refactor, migration, long debugging session) when the playbook is not already in context.
 ---
 
 # Fable mode
@@ -19,6 +19,10 @@ Activate the full Fable discipline for the rest of this session:
 4. Confirm activation in one line ("Fable mode active — playbook and behavior
    layer loaded."), then continue with the user's task. Do not summarize the
    documents back.
+
+If the playbook is already in this context (look for a "Fable mode active"
+injection from the hook), skip the reads: confirm activation in one line and
+apply `fable-code.md` from context, reading it only if absent.
 
 Scale the heavier machinery to the task: the evidence ledger and the
 `grounding-verifier` agent are for non-trivial or hard-to-reverse work, not for

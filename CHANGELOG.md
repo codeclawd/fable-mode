@@ -29,6 +29,17 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `.lockb` skip entry.
 
 ### Added
+- Auto-activation: `fable-trigger.py` scores prompt complexity (ru+en signals:
+  task verbs, code fences, file paths, multi-step markers, length) and loads
+  the playbook by itself for task-shaped prompts, once per session, in any
+  session — no launcher or phrase needed. Opt out with `FABLE_AUTO=0`.
+- `fable --ultra` (alias `-u`): launches with ultracode auto-orchestration; new
+  "Orchestration" section in the playbook (fan-out, adversarial verification
+  via `grounding-verifier`, plan-gating, calibration).
+- `fable doctor`: one-command diagnosis of the install/activation chain —
+  files, registered hooks, interpreter paths, Claude Code version, a live-fire
+  injection test, and transcript evidence of past activations.
+- The `/fable` skill triggers proactively at the start of non-trivial tasks.
 - `fable-code.md`: an original Claude Code-native Fable behavior layer; the
   launcher appends it instead of the 1,600-line consumer prompt (which stays
   bundled for reference).

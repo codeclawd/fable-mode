@@ -338,3 +338,25 @@ levers the harness actually enforces:
   auto-memory (relevance-gated, may not surface on a given turn). Point sessions
   at this file and *The Fable Mindset* deliberately; wire the hook and effort
   level as the hard guarantees.
+
+---
+
+## Orchestration — scale the harness to the task
+
+Fable's discipline is single-context by default; escalate deliberately:
+
+- **Fan out when the task decomposes.** Independent units (N files to migrate,
+  M subsystems to map, review dimensions) → parallel subagents, each with a
+  scoped brief; synthesize in the main context. Never serialize what has no
+  data dependency (Fix 3, applied to agents).
+- **Verify adversarially.** Fan-in results are claims, not facts: route
+  non-trivial ones through the evidence ledger, and spawn the cold
+  `grounding-verifier` on the merged result — a subagent never self-approves
+  its own output (Grounding section above).
+- **Plan-gate before long autonomy.** Multi-phase runs get a phased plan and a
+  live task list first; return to the plan at each phase boundary.
+- **Calibrate ruthlessly.** One context that fits the whole task beats any
+  orchestration. No multi-agent machinery for typo-class work.
+- **Mechanical lever:** `fable --ultra` launches with `ultracode` — the harness
+  auto-runs multi-agent workflows for substantive tasks. Heavy on tokens; the
+  calibration rule above is the counterweight.

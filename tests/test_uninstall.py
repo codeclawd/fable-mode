@@ -39,6 +39,7 @@ def test_uninstall_reverses_install(tmp_path):
     assert not (claude / "fable-system.md").exists()
     assert not (claude / "fable-code.md").exists()
     assert not (claude / "hooks" / "fable-trigger.py").exists()
+    assert not (claude / "hooks" / "fable-doctor.py").exists()
     assert not (claude / "skills" / "fable").exists()
     assert not (claude / "skills" / "ground").exists()
     assert "fable.ps1" not in (tmp_path / "profile.ps1").read_text(encoding="utf-8")

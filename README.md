@@ -64,10 +64,10 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 - **`fable-system.md`** — the leaked Fable 5 system prompt (Anthropic's; see note below).
 - **`fable-code.md`** — an original Claude Code-native distillation of Fable's terminal behavior (final-message contract, readable-over-concise, tool discipline, autonomy rules). This is what the launcher actually appends; the consumer prompt above stays bundled for reference.
 - **`/fable` skill** — explicit activation: reads the playbook + behavior layer and adopts both mid-session, no launcher required.
-- **Hooks** — `fable-trigger.py` injects the playbook at `xhigh`/`max`/`ultracode`; `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
+- **Hooks** — `fable-trigger.py` injects the playbook when the launcher declares the mode, at `xhigh`/`max`/`ultracode` effort, on a trigger phrase, or **by itself when the prompt looks like a real task** (ru+en heuristic; opt out with `FABLE_AUTO=0`); `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
 - **`/ground` skill + `grounding-verifier` agent** — a self-terminating grounding loop and a cold verifier that assumes every claim is wrong until the live code proves it.
 - **Skills** — `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
-- **`fable` launcher** — pins `--model claude-opus-4-8`, appends `fable-code.md`, sets `xhigh` effort, and declares the mode via `FABLE_MODE=1` so the playbook injects at session start on every Claude Code version (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). Want multi-agent auto-orchestration on top? Add `--settings '{"ultracode": true}'`.
+- **`fable` launcher** — pins `--model claude-opus-4-8`, appends `fable-code.md`, sets `xhigh` effort, and declares the mode via `FABLE_MODE=1` so the playbook injects at session start on every Claude Code version (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). `fable --ultra` adds ultracode multi-agent orchestration; `fable doctor` verifies the whole install/activation chain in one command.
 
 ## The honest ceiling
 
