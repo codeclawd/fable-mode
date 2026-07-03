@@ -105,13 +105,17 @@ def test_healthy_launcher_line_is_ok(tmp_path):
 
 def fake_claude_bin(tmp_path):
     """A fake `claude` that answers --version and prints its flags the way the
-    real CLI does: the file variant only as the `[-file]` bracket shorthand."""
+    real CLI does: the file variant only as the `[-file]` bracket shorthand.
+    On Windows it is a .cmd shim on purpose — that is exactly how npm installs
+    the real CLI, and spawning it is part of what the probe must handle. The
+    version is deliberately not a real release so a pass proves the fake (not
+    a claude installed on the host) answered."""
     bindir = tmp_path / "bin"
     bindir.mkdir()
     if os.name == "nt":
         (bindir / "claude.cmd").write_text(
             '@echo off\r\n'
-            'if "%1"=="--version" echo 2.1.199 (Claude Code)\r\n'
+            'if "%1"=="--version" echo 2.1.777 (Claude Code)\r\n'
             'if "%1"=="--help" echo   --effort ^<level^>\r\n'
             'if "%1"=="--help" echo   via: --append-system-prompt[-file]\r\n',
             encoding="ascii")
@@ -119,7 +123,7 @@ def fake_claude_bin(tmp_path):
         f = bindir / "claude"
         f.write_text('#!/bin/sh\n'
                      'case "$1" in\n'
-                     '  --version) echo "2.1.199 (Claude Code)";;\n'
+                     '  --version) echo "2.1.777 (Claude Code)";;\n'
                      '  --help) echo "  --effort <level>";'
                      ' echo "  via: --append-system-prompt[-file]";;\n'
                      'esac\n', encoding="ascii")
@@ -127,9 +131,11 @@ def fake_claude_bin(tmp_path):
     return str(bindir)
 
 
-def test_bracket_shorthand_in_help_is_not_a_missing_flag(tmp_path):
-    """The real CLI lists --append-system-prompt-file only as the
-    `--append-system-prompt[-file]` shorthand; the probe must not warn."""
+def test_cli_probe_handles_cmd_shims_and_bracket_shorthand(tmp_path):
+    """Two probe requirements in one live run: a .cmd shim on PATH (the npm
+    install layout on Windows) must be spawnable, and the real CLI's
+    `--append-system-prompt[-file]` bracket shorthand must not be misread as
+    a missing flag."""
     fake_install(tmp_path)
     env = dict(os.environ)
     env["HOME"] = str(tmp_path)
@@ -140,7 +146,7 @@ def test_bracket_shorthand_in_help_is_not_a_missing_flag(tmp_path):
     env.pop("FABLE_MODE", None)
     p = subprocess.run([sys.executable, str(DOCTOR)], capture_output=True,
                        text=True, env=env)
-    assert "claude 2.1.199" in p.stdout, p.stdout
+    assert "claude 2.1.777" in p.stdout, p.stdout
     assert "--append-system-prompt-file" not in p.stdout, (
         "bracket shorthand in --help was misread as a missing flag")
     assert p.returncode == 0, p.stdout

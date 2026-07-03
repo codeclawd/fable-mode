@@ -164,15 +164,24 @@ def check_launcher():
              "(re-run install.py to add it)")
 
 
+def _shim_safe(exe, args):
+    """npm installs claude as a .cmd shim on Windows; CreateProcess can't
+    spawn those by name or path — route them through cmd.exe."""
+    if exe.lower().endswith((".cmd", ".bat")):
+        return ["cmd", "/c", exe] + args
+    return [exe] + args
+
+
 def check_claude_cli():
     if os.environ.get("FABLE_DOCTOR_SKIP_CLI") == "1":
         warn("claude CLI probe skipped (FABLE_DOCTOR_SKIP_CLI=1)")
         return
-    if not shutil.which("claude"):
+    exe = shutil.which("claude")
+    if not exe:
         warn("claude CLI not on PATH - the fable launcher won't start")
         return
     try:
-        out = subprocess.run(["claude", "--version"], capture_output=True,
+        out = subprocess.run(_shim_safe(exe, ["--version"]), capture_output=True,
                              text=True, timeout=30).stdout.strip()
     except Exception as e:
         warn("claude --version failed: {}".format(e))
@@ -189,7 +198,7 @@ def check_claude_cli():
         warn("claude {} < 2.1.199: effort not exposed to hooks; "
              "phrase/FABLE_MODE/SessionStart paths unaffected".format(label))
     try:
-        help_out = subprocess.run(["claude", "--help"], capture_output=True,
+        help_out = subprocess.run(_shim_safe(exe, ["--help"]), capture_output=True,
                                   text=True, timeout=30).stdout
     except Exception:
         help_out = ""
