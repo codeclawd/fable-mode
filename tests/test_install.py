@@ -36,6 +36,8 @@ def test_install_copies_everything(tmp_path):
 
     assert (claude / "FABLE_PLAYBOOK.md").is_file()
     assert (claude / "fable-system.md").is_file()
+    assert (claude / "fable-code.md").is_file()
+    assert (claude / "skills" / "fable" / "SKILL.md").is_file()
     assert (claude / "hooks" / "fable-trigger.py").is_file()
     assert (claude / "hooks" / "test-after-edit.py").is_file()
     assert (claude / "agents" / "grounding-verifier.md").is_file()
@@ -49,6 +51,8 @@ def test_install_copies_everything(tmp_path):
     assert s["alwaysThinkingEnabled"] is True
     cmd = s["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
     assert sys.executable in cmd  # absolute interpreter, not a bare "python3"
+    ss_cmd = s["hooks"]["SessionStart"][0]["hooks"][0]["command"]
+    assert "fable-trigger.py" in ss_cmd
 
 
 def test_install_is_idempotent(tmp_path):
@@ -60,6 +64,7 @@ def test_install_is_idempotent(tmp_path):
     s = json.loads((claude / "settings.json").read_text(encoding="utf-8"))
     assert len(s["hooks"]["UserPromptSubmit"]) == 1
     assert len(s["hooks"]["PostToolUse"]) == 1
+    assert len(s["hooks"]["SessionStart"]) == 1
     assert (tmp_path / "profile.ps1").read_text(encoding="utf-8").count("fable.ps1") == 1
     assert (claude / "settings.json.bak").is_file()
 

@@ -7,6 +7,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
+- The playbook injector never actually fired: the effort path needs `effort` in
+  the hook payload or `CLAUDE_EFFORT` in the hook environment, which Claude Code
+  ≤ 2.1.198 did not provide, and the trigger phrases were undiscoverable. The
+  launcher now declares the mode via `FABLE_MODE=1` and `fable-trigger.py`
+  became dual-event — SessionStart injection (version-independent) plus the old
+  phrase/effort paths and a `FABLE_MODE` fallback on UserPromptSubmit.
 - `merge_settings.py` overwrote `settings.json.bak` on every install run, so a
   second install destroyed the pristine pre-install backup (contradicting the
   "safe to re-run" promise). It now writes that backup only when absent, keeping
@@ -23,6 +29,13 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `.lockb` skip entry.
 
 ### Added
+- `fable-code.md`: an original Claude Code-native Fable behavior layer; the
+  launcher appends it instead of the 1,600-line consumer prompt (which stays
+  bundled for reference).
+- `/fable` skill for explicit mid-session activation.
+- The launcher pins `--model claude-opus-4-8`, making the README's "runs on
+  Opus 4.8" promise true regardless of the user's default model.
+- Round-trip uninstall test (`tests/test_uninstall.py`).
 - `test-after-edit.py` gained a `FABLE_TEST_HOOK_ALLOW` allowlist (os.pathsep-
   separated trusted root prefixes) so the auto-run test hook can be confined to
   repositories you trust, plus a per-project `.fable-test` file to pin the exact

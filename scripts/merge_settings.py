@@ -41,6 +41,9 @@ def merge(settings_path, py, hooks_dir):
                    for e in arr for h in e.get("hooks", [])):
             arr.append(entry)
 
+    ensure("SessionStart",
+           {"hooks": [{"type": "command", "command": cmd("fable-trigger.py")}]},
+           "fable-trigger.py")
     ensure("UserPromptSubmit",
            {"hooks": [{"type": "command", "command": cmd("fable-trigger.py")}]},
            "fable-trigger.py")

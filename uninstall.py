@@ -103,7 +103,7 @@ def clean_settings():
     shutil.copy(path, path + ".uninstall.bak")
 
     hooks = d.get("hooks", {})
-    for event in ("UserPromptSubmit", "PostToolUse"):
+    for event in ("SessionStart", "UserPromptSubmit", "PostToolUse"):
         arr = hooks.get(event)
         if not isinstance(arr, list):
             continue
@@ -134,6 +134,7 @@ def main():
     rm_file(os.path.join(CLAUDE, "hooks", "test-after-edit.py"))
     rm_file(os.path.join(CLAUDE, "FABLE_PLAYBOOK.md"))
     rm_file(os.path.join(CLAUDE, "fable-system.md"))
+    rm_file(os.path.join(CLAUDE, "fable-code.md"))
     rm_file(os.path.join(CLAUDE, "agents", "grounding-verifier.md"))
     for name in bundled_skill_names():
         rm_tree(os.path.join(CLAUDE, "skills", name))

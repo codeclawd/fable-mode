@@ -101,6 +101,9 @@ def main():
     print("-> fable system prompt")
     copy_into("fable-system.md", CLAUDE)
 
+    print("-> fable behavior layer (Claude Code)")
+    copy_into("fable-code.md", CLAUDE)
+
     print("-> skills (all bundled) + agent")
     skills_dir = os.path.join(REPO, "skills")
     for name in sorted(os.listdir(skills_dir)):

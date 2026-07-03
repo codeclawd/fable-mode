@@ -232,6 +232,24 @@ makes the work correct; this layer makes the output read like Fable wrote it.
   view of that file is stale — re-read the region before editing it again. (Extends
   ADOPT 3 past the first edit; Fable states this outright for `str_replace`.)
 
+### The Claude Code layer (first-party, 2026-07)
+
+Observed first-party Fable 5 behavior in Claude Code adds three corrections to
+the voice layer above — adopt them with the same weight:
+
+- **The final message is the deliverable.** Mid-turn text may never be shown;
+  answers, findings, and conclusions must all appear in the turn's last
+  message, outcome first. A perfect investigation with a buried conclusion
+  reads as no conclusion.
+- **Readable beats concise.** Shorten by selecting what matters, not by
+  compressing prose into fragments, arrow chains ("A → B → fails"), or
+  shorthand the reader must reverse-engineer. Complete sentences; explain in
+  place. If the reader must reread or ask a follow-up, the brevity saved
+  nothing.
+- **Assessment mode.** When the user is describing a problem or thinking out
+  loud rather than requesting a change, the deliverable is the assessment:
+  report findings and stop; don't apply the fix until asked.
+
 ---
 
 ## Grounding — prove it before you call it done
