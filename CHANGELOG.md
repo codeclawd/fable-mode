@@ -7,6 +7,13 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
+- `merge_settings.py` overwrote `settings.json.bak` on every install run, so a
+  second install destroyed the pristine pre-install backup (contradicting the
+  "safe to re-run" promise). It now writes that backup only when absent, keeping
+  the original restore point intact.
+- Closed leaked file handles (`json.load(open(...))` / `json.dump(..., open(...))`)
+  in `merge_settings.py`, `uninstall.py`, and `test-after-edit.py` — they now use
+  `with` blocks, which also avoids file-lock surprises on Windows.
 - `fable-trigger.py` read the playbook from a hardcoded `/Users/ak/...` path, so
   on-demand injection silently failed for everyone but the original author. It now
   resolves `~/.claude/FABLE_PLAYBOOK.md`.
@@ -16,6 +23,11 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `.lockb` skip entry.
 
 ### Added
+- `test-after-edit.py` gained a `FABLE_TEST_HOOK_ALLOW` allowlist (os.pathsep-
+  separated trusted root prefixes) so the auto-run test hook can be confined to
+  repositories you trust, plus a per-project `.fable-test` file to pin the exact
+  command it runs (e.g. a fast, scoped command instead of the whole suite in a
+  monorepo). Documented in `SECURITY.md`; covered by new tests.
 - **One-command, cross-platform installer** (`install.py`) for Windows, macOS, and
   Linux. `install.sh` / `install.ps1` are thin wrappers that exec it.
 - PowerShell launcher (`shell/fable.ps1`) alongside the zsh one.
@@ -28,6 +40,11 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `SECURITY.md`, `CONTRIBUTING.md`, and this changelog.
 
 ### Changed
+- The `fable` launcher now defaults to `--effort xhigh` instead of
+  `--settings '{"ultracode": true}'`. xhigh still trips the playbook trigger and
+  drives heavy reasoning, without ultracode's token-hungry multi-agent
+  auto-orchestration; ultracode is now an explicit opt-in (documented in the
+  launcher and README).
 - `merge_settings.py` writes the absolute interpreter (`sys.executable`) and
   absolute hook paths into `settings.json`, so the hooks fire without `$HOME` or
   `python3` resolution at hook-run time.

@@ -95,7 +95,8 @@ def clean_settings():
     if not os.path.isfile(path):
         return
     try:
-        d = json.load(open(path))
+        with open(path) as f:
+            d = json.load(f)
     except Exception:
         print("  settings.json unreadable — left untouched")
         return
@@ -122,7 +123,8 @@ def clean_settings():
     elif "hooks" in d:
         d["hooks"] = hooks
 
-    json.dump(d, open(path, "w"), indent=2)
+    with open(path, "w") as f:
+        json.dump(d, f, indent=2)
     print("  removed Fable hooks from settings.json (backup: settings.json.uninstall.bak)")
 
 

@@ -39,7 +39,7 @@ python install.py        # Windows  (use python3 on macOS / Linux)
 Then reload your shell and launch:
 
 ```sh
-fable        # Opus 4.8 + Fable prompt + ultracode
+fable        # Opus 4.8 + Fable prompt + xhigh effort
 ```
 
 Prefer a native one-liner? `./install.sh` (macOS / Linux) and `.\install.ps1` (Windows) just locate Python and run `install.py` for you.
@@ -65,7 +65,7 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 - **Hooks** — `fable-trigger.py` injects the playbook at `xhigh`/`max`/`ultracode`; `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
 - **`/ground` skill + `grounding-verifier` agent** — a self-terminating grounding loop and a cold verifier that assumes every claim is wrong until the live code proves it.
 - **Skills** — `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
-- **`fable` launcher** — Opus 4.8 + the prompt + `ultracode` effort (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell).
+- **`fable` launcher** — Opus 4.8 + the prompt + `xhigh` effort (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). Want multi-agent auto-orchestration on top? Swap `--effort xhigh` for `--settings '{"ultracode": true}'` in the launcher.
 
 ## The honest ceiling
 
