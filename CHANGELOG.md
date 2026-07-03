@@ -7,6 +7,36 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
+- The shell profile sourced the launcher from the cloned repo, so deleting or
+  moving the clone broke every new shell, and a re-install from a new path
+  silently kept the stale line. The installer now copies `fable.ps1`/`fable.zsh`
+  into `~/.claude/shell/` and sources the stable copy; a stale launcher line is
+  replaced, not kept.
+- Auto/effort-activated sessions lost the playbook forever after a compaction:
+  SessionStart re-injected only under `FABLE_MODE=1`, while the session marker
+  blocked the UserPromptSubmit path. The trigger hook now re-injects on
+  `source == "compact"` whenever the marker proves the mode was active, and
+  drops the marker on `source == "clear"` so the once-per-session paths re-arm.
+- `FABLE_PLAYBOOK.md` instructed the model to read the author's personal files
+  (`~/Downloads/Fable_Mindset_public.md`, `~/compare_models.py`,
+  `~/fable_dataset_delta.py`, `reference/llm-bias-awareness.md`) that no user
+  has — every fable session risked a failing Read. They are now provenance
+  notes, not paths; a content-guard test keeps them out.
+- The `/fable` skill's fallback ("read the playbook from this skill's
+  repository") was unreachable after install — the installed skill is a lone
+  SKILL.md. The fallback now points at `fable doctor` / re-running the
+  installer.
+- The installer silently `rmtree`'d a user's own `~/.claude/skills/<name>`
+  when it collided with a bundled skill name; it now preserves such
+  directories under `~/.claude/backups/skills/` and marks its own copies with
+  a `.fable-mode-bundled` file. The uninstaller removes only marked
+  directories.
+- `test-after-edit.py` ran the suite even when the Edit tool itself had
+  failed (reporting a stale result), and `fable.ps1 doctor` hardcoded
+  `python`, breaking on machines where only `py`/`python3` exists. Both
+  fixed; the doctor subcommand now falls back across `python`/`py`/`python3`.
+- Session/debounce marker files accumulated in `%TEMP%` forever on Windows;
+  both hooks now garbage-collect markers older than a week.
 - "Invalid JSON provided for --settings" on Windows PowerShell 5.1 (#2): PS 5.1
   strips embedded quotes when building the native command line, so the inline
   `--settings '{"ultracode": true}'` reached claude as `{ultracode: true}`. The
@@ -34,6 +64,20 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `.lockb` skip entry.
 
 ### Added
+- Double-injection guard: before the once-per-session auto/effort injection,
+  the trigger hook scans the session transcript for a "Fable mode active"
+  line — a session already activated via the `/fable` skill doesn't get a
+  second copy of the playbook.
+- On Windows the launcher is now installed into the `$PROFILE` of **both**
+  PowerShell 7 and Windows PowerShell 5.1 when both are present.
+- `fable doctor` now also verifies the launcher line in the shell profiles
+  (a line pointing at a missing file is a hard failure), accepts hooks
+  registered in `settings.local.json`, probes `claude --help` for the
+  `--effort` / `--append-system-prompt-file` flags the launcher relies on,
+  and checks the installed `~/.claude/shell/` launcher copies.
+- The auto-activation heuristic learned more everyday task verbs
+  (update/upgrade/remove/delete/deploy/rename/write; удалить/обновить/
+  написать/запустить/перенести/убрать).
 - Auto-activation: `fable-trigger.py` scores prompt complexity (ru+en signals:
   task verbs, code fences, file paths, multi-step markers, length) and loads
   the playbook by itself for task-shaped prompts, once per session, in any

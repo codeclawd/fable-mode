@@ -48,7 +48,7 @@ Prefer a native one-liner? `./install.sh` (macOS / Linux) and `.\install.ps1` (W
 
 > **Requirements:** Python on PATH (`python --version`) for the hooks, and Claude Code installed for the `fable` launcher. On Windows, if `.\install.ps1` is blocked by execution policy, run `python install.py` directly (no policy needed).
 
-The installer copies everything into `~/.claude`, adds the `fable` launcher (to your shell rc on Unix, to your PowerShell `$PROFILE` on Windows), and merges your settings (with a backup) — writing the absolute interpreter and hook paths so the hooks fire on every platform. Idempotent: safe to re-run. Needs Python ≥ 3.9 (the hooks are stdlib-only — no pip installs). No model switch, no API key — it runs on the Opus 4.8 you already have.
+The installer copies everything into `~/.claude` — including the launcher itself (`~/.claude/shell/`), so you can delete the clone afterwards — adds the `fable` launcher (to your shell rc on Unix, to the `$PROFILE` of both PowerShell 7 and Windows PowerShell on Windows), and merges your settings (with a backup) — writing the absolute interpreter and hook paths so the hooks fire on every platform. Idempotent: safe to re-run, and a same-named skill you wrote yourself is preserved under `~/.claude/backups/skills/` instead of being overwritten. Needs Python ≥ 3.9 (the hooks are stdlib-only — no pip installs). No model switch, no API key — it runs on the Opus 4.8 you already have.
 
 ## Uninstall
 
@@ -56,7 +56,7 @@ The installer copies everything into `~/.claude`, adds the `fable` launcher (to 
 python uninstall.py        # Windows  (python3 on macOS / Linux; or ./uninstall.sh, .\uninstall.ps1)
 ```
 
-Removes the bundled files from `~/.claude`, strips the `fable` launcher line, and drops the two Fable hooks from `settings.json` (writing a fresh backup). It's surgical — your own skills, unrelated hooks, and `alwaysThinkingEnabled` are left untouched.
+Removes the bundled files from `~/.claude`, strips the `fable` launcher line, and drops the two Fable hooks from `settings.json` (writing a fresh backup). It's surgical — only skill directories carrying the installer's `.fable-mode-bundled` marker are removed; your own skills, unrelated hooks, and `alwaysThinkingEnabled` are left untouched.
 
 ## What's in the bundle
 
