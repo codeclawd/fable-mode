@@ -26,7 +26,8 @@ def fake_install(home):
     (claude / "hooks").mkdir(parents=True)
     (claude / "skills" / "fable").mkdir(parents=True)
     (claude / "agents").mkdir(parents=True)
-    for rel in ("FABLE_PLAYBOOK.md", "fable-code.md", "fable-system.md"):
+    for rel in ("FABLE_PLAYBOOK.md", "fable-code.md", "fable-system.md",
+                "ultracode.settings.json"):
         (claude / rel).write_text("PLAYBOOK", encoding="utf-8")
     shutil.copy(REPO / "hooks" / "fable-trigger.py",
                 claude / "hooks" / "fable-trigger.py")

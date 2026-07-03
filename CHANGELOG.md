@@ -7,6 +7,11 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
+- "Invalid JSON provided for --settings" on Windows PowerShell 5.1 (#2): PS 5.1
+  strips embedded quotes when building the native command line, so the inline
+  `--settings '{"ultracode": true}'` reached claude as `{ultracode: true}`. The
+  launchers now pass a settings *file* (`~/.claude/ultracode.settings.json`,
+  shipped and installed), which survives quoting on every shell and PS version.
 - The playbook injector never actually fired: the effort path needs `effort` in
   the hook payload or `CLAUDE_EFFORT` in the hook environment, which Claude Code
   ≤ 2.1.198 did not provide, and the trigger phrases were undiscoverable. The

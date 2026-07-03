@@ -37,6 +37,7 @@ def test_install_copies_everything(tmp_path):
     assert (claude / "FABLE_PLAYBOOK.md").is_file()
     assert (claude / "fable-system.md").is_file()
     assert (claude / "fable-code.md").is_file()
+    assert (claude / "ultracode.settings.json").is_file()
     assert (claude / "skills" / "fable" / "SKILL.md").is_file()
     assert (claude / "hooks" / "fable-trigger.py").is_file()
     assert (claude / "hooks" / "test-after-edit.py").is_file()

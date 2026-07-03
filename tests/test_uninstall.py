@@ -38,6 +38,7 @@ def test_uninstall_reverses_install(tmp_path):
     assert not (claude / "FABLE_PLAYBOOK.md").exists()
     assert not (claude / "fable-system.md").exists()
     assert not (claude / "fable-code.md").exists()
+    assert not (claude / "ultracode.settings.json").exists()
     assert not (claude / "hooks" / "fable-trigger.py").exists()
     assert not (claude / "hooks" / "fable-doctor.py").exists()
     assert not (claude / "skills" / "fable").exists()

@@ -50,6 +50,7 @@ CORE_FILES = [
     "FABLE_PLAYBOOK.md",
     "fable-code.md",
     "fable-system.md",
+    "ultracode.settings.json",
     os.path.join("hooks", "fable-trigger.py"),
     os.path.join("hooks", "test-after-edit.py"),
     os.path.join("skills", "fable", "SKILL.md"),

@@ -136,6 +136,7 @@ def main():
     rm_file(os.path.join(CLAUDE, "FABLE_PLAYBOOK.md"))
     rm_file(os.path.join(CLAUDE, "fable-system.md"))
     rm_file(os.path.join(CLAUDE, "fable-code.md"))
+    rm_file(os.path.join(CLAUDE, "ultracode.settings.json"))
     rm_file(os.path.join(CLAUDE, "agents", "grounding-verifier.md"))
     for name in bundled_skill_names():
         rm_tree(os.path.join(CLAUDE, "skills", name))

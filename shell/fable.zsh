@@ -17,7 +17,10 @@ fable() {
   local -a extra
   if [[ "$1" == "--ultra" || "$1" == "-u" ]]; then
     shift
-    extra=(--settings '{"ultracode": true}')
+    # A file path, not inline JSON: PowerShell 5.1 strips embedded quotes from
+    # native-command args, and inline JSON breaks the same way if copy-pasted
+    # across shells (issue #2). A path survives quoting everywhere.
+    extra=(--settings "$HOME/.claude/ultracode.settings.json")
   fi
   FABLE_MODE=1 claude --model claude-opus-4-8 \
     --append-system-prompt-file "$HOME/.claude/fable-code.md" \

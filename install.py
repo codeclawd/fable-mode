@@ -104,6 +104,7 @@ def main():
 
     print("-> fable behavior layer (Claude Code)")
     copy_into("fable-code.md", CLAUDE)
+    copy_into("shell/ultracode.settings.json", CLAUDE)
 
     print("-> skills (all bundled) + agent")
     skills_dir = os.path.join(REPO, "skills")

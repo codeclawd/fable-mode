@@ -18,7 +18,11 @@ function fable {
     $extra = @()
     if ($rest.Count -gt 0 -and ($rest[0] -eq '--ultra' -or $rest[0] -eq '-u')) {
         $rest = @($rest | Select-Object -Skip 1)
-        $extra = @('--settings', '{"ultracode": true}')
+        # A file path, not inline JSON: Windows PowerShell 5.1 strips the inner
+        # quotes when building the native command line, so {"ultracode": true}
+        # reaches claude as {ultracode: true} — "Invalid JSON provided for
+        # --settings" (issue #2). A path survives quoting on every PS version.
+        $extra = @('--settings', "$HOME\.claude\ultracode.settings.json")
     }
     $env:FABLE_MODE = "1"
     try {
