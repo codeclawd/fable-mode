@@ -27,8 +27,9 @@ def test_launchers_pass_no_inline_json():
         assert "ultracode.settings.json" in text, f"{name} should use the settings file"
 
 
-@pytest.mark.skipif(not shutil.which("powershell"),
-                    reason="Windows PowerShell 5.1 not available")
+@pytest.mark.skipif(os.name != "nt" or not shutil.which("powershell"),
+                    reason="Windows PowerShell 5.1 only exists on Windows; on "
+                           "macOS/Linux runners `powershell` is just pwsh")
 def test_ultra_flag_survives_powershell51(tmp_path):
     """Drive the real fable.ps1 through powershell.exe with a fake claude.cmd and
     assert the --settings argument arrives brace-free (i.e. a file path)."""
