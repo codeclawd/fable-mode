@@ -9,11 +9,14 @@ Activate the full Fable discipline for the rest of this session:
 
 1. Read `~/.claude/FABLE_PLAYBOOK.md` (execution discipline: reason before
    acting, observe-then-decide, verify every edit, communication floor,
-   grounding protocol). If the file is missing, read `FABLE_PLAYBOOK.md` from
-   this skill's repository instead.
+   grounding protocol).
 2. Read `~/.claude/fable-code.md` (the Claude Code behavior layer: final-message
    contract, readable-over-concise, tool discipline, autonomy and honesty
-   rules). Same fallback.
+   rules).
+   If either file is missing, the install is broken — don't hunt for other
+   copies. Tell the user to run `fable doctor` (or re-run `python install.py`
+   from the fable-mode checkout), then continue with the task, applying
+   whatever Fable discipline is already in context.
 3. Adopt both as standing discipline — they govern every subsequent turn of
    this session, not just the next reply.
 4. Confirm activation in one line ("Fable mode active — playbook and behavior

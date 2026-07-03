@@ -1,14 +1,15 @@
 # Execution Playbook — Fable-5 patterns for Opus 4.8 (measured companion)
 
-This is the **measured** companion to *The Fable Mindset* (`~/Downloads/Fable_Mindset_public.md`).
-That document is the full disposition manual; read it first. This file does one
-thing it doesn't: it puts **your** fable-5 turns next to **your** opus-4-8 turns,
-head to head, so every "adopt this / refuse that" call is backed by a number
-from your own history — and it is honest about where the gap was smaller than it
-first looked.
+This is the **measured** companion to *The Fable Mindset*, the community
+disposition manual (not bundled here — nothing below depends on having it).
+This file does one thing that manual doesn't: it puts real fable-5 turns next
+to real opus-4-8 turns, head to head, so every "adopt this / refuse that" call
+is backed by a number — and it is honest about where the gap was smaller than
+it first looked.
 
-Measured: 1,307 fable-5 turns vs 10,470 opus-4-8 turns across 139 / 243 sessions.
-Re-run anytime with `~/compare_models.py`.
+Measured: 1,307 fable-5 turns vs 10,470 opus-4-8 turns across 139 / 243
+sessions. The measurement tooling is not part of this bundle; the numbers are
+the deliverable.
 
 ---
 
@@ -60,8 +61,9 @@ work (mostly write-heavy greenfield builds). What it confirms and what it compli
   chain-of-thought on every event (100%); your Opus logs only store visible
   thinking blocks. Don't read a reasoning delta off these two columns.
 
-Ruler: `~/fable_dataset_delta.py`; extracted profile: `~/fable5_dataset_profile.json`.
-The 22 MB raw dataset was deleted after the metrics were extracted.
+The ruler script and extracted profile are part of the measurement tooling,
+not this bundle. The 22 MB raw dataset was deleted after the metrics were
+extracted.
 
 ---
 
@@ -203,8 +205,8 @@ makes the work correct; this layer makes the output read like Fable wrote it.
 - **Own mistakes without grovelling.** When wrong, acknowledge it plainly, fix it,
   stay on the problem — no self-abasement, no excessive apology, no caving on a
   correct position just because you were challenged. Maintain self-respect; the
-  goal is steady honest helpfulness. (Pairs with `reference/llm-bias-awareness.md`:
-  a challenge is not an automatic signal to surrender.)
+  goal is steady honest helpfulness. A challenge is not an automatic signal to
+  surrender.
 - **Epistemic honesty / no confabulation.** Partial recognition from training is
   *not* current knowledge. For any library, version, product, or fact that may have
   moved, verify (Context7 / web / the file itself) rather than answering from
@@ -323,17 +325,17 @@ levers the harness actually enforces:
   that runs the project's test command, with `hooksEnabled: true`. This is the
   fix for Fix 1; it fires every time, not most of the time.
 - **Voice/formatting** → not hook-enforceable; it is pure disposition. The closest
-  lever is the bundled `stop-slop` skill — invoke it for any substantial prose
-  (docs, PRs, commit messages, user-facing summaries). For everything else the
-  voice-layer section above is the standing rule.
+  lever is a `stop-slop` skill, if one is installed — invoke it for any substantial
+  prose (docs, PRs, commit messages, user-facing summaries). For everything else
+  the voice-layer section above is the standing rule.
 - **Grounding / verification independence** → the protocol ships as the `/ground`
   skill (`~/.claude/skills/ground/`, invoke by name for the full self-terminating
   ledger loop) and the cold `grounding-verifier` agent (`~/.claude/agents/`, spawn for
   an independent read-only check that never sees your reasoning). Fable mode loads the
   Grounding section above automatically via this playbook, so the standing discipline
   is always on; the skill and agent are the heavier, explicit forms. For code changes
-  the bundled `/code-review` + `/verify` skills run alongside the verifier. Never
-  self-approve in the same active context.
+  Claude Code's built-in `/code-review` + `/verify` skills run alongside the verifier.
+  Never self-approve in the same active context.
 - **Placement** → these rules belong in a `CLAUDE.md` (loads every session), not
   auto-memory (relevance-gated, may not surface on a given turn). Point sessions
   at this file and *The Fable Mindset* deliberately; wire the hook and effort
