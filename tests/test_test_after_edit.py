@@ -13,8 +13,10 @@ REPO = Path(__file__).resolve().parents[1]
 HOOK = REPO / "hooks" / "test-after-edit.py"
 
 
-def run(tool_input, tool_name="Edit", env_extra=None):
+def run(tool_input, tool_name="Edit", env_extra=None, tool_response=None):
     payload = {"tool_name": tool_name, "tool_input": tool_input}
+    if tool_response is not None:
+        payload["tool_response"] = tool_response
     env = dict(os.environ)
     env["FABLE_TEST_HOOK_DEBOUNCE"] = "0"  # don't let debounce swallow back-to-back tests
     if env_extra:
@@ -70,3 +72,72 @@ def test_disabled_via_env(tmp_path):
 def test_non_edit_tool_ignored(tmp_path):
     src = make_py_project(tmp_path, passing=True)
     assert run({"file_path": str(src)}, tool_name="Read") == ""
+
+
+def _exit_cmd(code):
+    # Quoted so a sys.executable path with spaces still parses under the shell.
+    return '"{}" -c "import sys; sys.exit({})"'.format(sys.executable, code)
+
+
+def test_fable_test_override_passing(tmp_path):
+    (tmp_path / ".fable-test").write_text(_exit_cmd(0) + "\n", encoding="utf-8")
+    src = tmp_path / "mod.py"
+    src.write_text("x = 1\n", encoding="utf-8")
+    out = run({"file_path": str(src)})
+    assert "passed" in out, out
+
+
+def test_fable_test_override_failing(tmp_path):
+    (tmp_path / ".fable-test").write_text(_exit_cmd(1) + "\n", encoding="utf-8")
+    src = tmp_path / "mod.py"
+    src.write_text("x = 1\n", encoding="utf-8")
+    out = run({"file_path": str(src)})
+    assert "FAILED" in out, out
+
+
+def test_fable_test_override_skips_comments_and_blanks(tmp_path):
+    (tmp_path / ".fable-test").write_text(
+        "# a comment\n\n" + _exit_cmd(0) + "\n", encoding="utf-8")
+    src = tmp_path / "mod.py"
+    src.write_text("x = 1\n", encoding="utf-8")
+    assert "passed" in run({"file_path": str(src)})
+
+
+def test_allowlist_permits_listed_root(tmp_path):
+    src = make_py_project(tmp_path, passing=True)
+    out = run({"file_path": str(src)},
+              env_extra={"FABLE_TEST_HOOK_ALLOW": str(tmp_path)})
+    assert "passed" in out, out
+
+
+def test_allowlist_blocks_root_outside_it(tmp_path):
+    src = make_py_project(tmp_path, passing=True)
+    elsewhere = str(tmp_path.parent / "some-other-trusted-tree")
+    assert run({"file_path": str(src)},
+               env_extra={"FABLE_TEST_HOOK_ALLOW": elsewhere}) == ""
+
+
+def test_failed_edit_skips_test_run(tmp_path):
+    """When the Edit tool itself failed, nothing changed on disk - running the
+    suite would only report a stale result."""
+    src = make_py_project(tmp_path, passing=True)
+    assert run({"file_path": str(src)}, tool_response={"success": False}) == ""
+
+
+def test_successful_edit_response_still_runs(tmp_path):
+    src = make_py_project(tmp_path, passing=True)
+    out = run({"file_path": str(src)}, tool_response={"success": True})
+    assert "passed" in out, out
+
+
+def test_stale_testhook_markers_are_pruned(tmp_path):
+    import tempfile
+    import time
+    import uuid
+    stale = Path(tempfile.gettempdir()) / ("fable-testhook-stale-" + uuid.uuid4().hex)
+    stale.touch()
+    old = time.time() - 8 * 86400
+    os.utime(stale, (old, old))
+    src = make_py_project(tmp_path, passing=True)
+    assert "passed" in run({"file_path": str(src)})
+    assert not stale.exists(), "markers older than a week should be pruned"

@@ -67,10 +67,12 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 - **`FABLE_CODE.md`** — the core. An original distillation of Fable 5's actual Claude Code operating layer: the final-message contract, outcome-first summaries, act-don't-ask autonomy, the report-vs-fix distinction, evidence-before-state-change, irreversibility-scaled reasoning, and the voice rules that genuinely transfer from the consumer prompt. This is what the launcher appends and the trigger hook injects.
 - **`FABLE_PLAYBOOK.md`** — the measured layer. Fable-5 vs Opus-4-8 tool traces turned into rules: reasoning density (70% vs 47%), verify-after-edit, parallelism — plus an evidence-ledger grounding protocol. Original work, corrected in v2 against the harness itself (see the Fix 2 measurement caveat).
 - **`reference/fable-system-consumer.md`** — the leaked Fable 5 *consumer* prompt, kept for reference and provenance only. Never installed, never injected.
-- **Hooks** — `fable-trigger.py` injects `FABLE_CODE.md` once per session (always on, sized under Claude Code's 10k-char hook-output cap) and directs the model to read the full playbook on `xhigh`/`max`/`ultracode` or the phrase "use fable"; `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
+- **Hooks** — `fable-trigger.py` is a dual-event hook (SessionStart + UserPromptSubmit) that injects `FABLE_CODE.md` rules once per session (always on, sized under Claude Code's 10k-char hook-output cap) and directs the model to read the full playbook on `xhigh`/`max`/`ultracode` effort, the phrase "use fable", or when a prompt looks like a real engineering task (auto-activation heuristic; opt out with `FABLE_AUTO=0`). `test-after-edit.py` runs your project's tests after each edit and reports the result back — the one habit no model keeps on willpower.
+- **`fable doctor`** — one command that verifies the whole install/activation chain: files present, hooks registered, interpreter paths, Claude CLI version, a live-fire injection test, and transcript evidence of past activations. Run it any time something seems off.
+- **`/fable` skill** — explicit mid-session activation: reads the playbook + behavior layer and adopts both, no launcher required.
 - **`/ground` skill + `grounding-verifier` agent** — a self-terminating grounding loop and a cold verifier that assumes every claim is wrong until the live code proves it.
-- **Skills** — `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
-- **`fable` launcher** — Opus 4.8 + `FABLE_CODE.md` appended to the system prompt + `ultracode` effort (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell).
+- **Skills** — `fable` (activation), `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
+- **`fable` launcher** — pins `--model claude-opus-4-8`, appends `FABLE_CODE.md`, sets `xhigh` effort, and declares the mode via `FABLE_MODE=1` so the playbook injects at session start on every Claude Code version (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). `fable --ultra` adds ultracode multi-agent orchestration; `fable doctor` verifies the install.
 
 ## Pairs with loop-harness-system
 
@@ -87,7 +89,7 @@ This gives you Fable's *disposition*, not its raw capability. Reasoning depth, v
 
 ## Credits
 
-Made by HalalifyMusic — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work.
+Made by HalalifyMusic — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work. Activation reliability improvements (`fable doctor`, dual-event SessionStart hooks, auto-activation heuristic, test-hook trust gate, skill preservation) adapted from [@denfry](https://github.com/denfry)'s [PR #3](https://github.com/HalalifyMusic/fable-mode/pull/3).
 
 ## Contributing
 

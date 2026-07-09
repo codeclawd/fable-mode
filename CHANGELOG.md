@@ -6,6 +6,35 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added — activation reliability (from @denfry, PR #3, adapted)
+- **`fable doctor`** — one command that verifies the whole install/activation
+  chain: files present, hooks registered (settings.json + settings.local.json),
+  interpreter paths, launcher profile lines, Claude CLI version/flags, a
+  live-fire injection test, and transcript evidence of past activations.
+- **Dual-event trigger hook.** `fable-trigger.py` now fires on both SessionStart
+  and UserPromptSubmit. SessionStart injection works on every Claude Code version
+  (not just 2.1.199+) when the launcher declares `FABLE_MODE=1`. Compact re-injects
+  into wiped context; clear re-arms the once-per-session guards.
+- **`FABLE_MODE=1` from the launcher** — the `fable` command now declares the
+  mode so the hook injects at session start without depending on the effort field
+  in the hook payload.
+- **Auto-activation heuristic.** A task-shaped prompt (task verbs, code fences,
+  file paths, multi-step markers, length — bilingual ru/en) auto-loads the
+  playbook once per session. Opt out with `FABLE_AUTO=0`.
+- **`/fable` skill** — explicit mid-session activation: reads the playbook +
+  behavior layer and adopts both, no launcher required.
+- **`fable --ultra`** — ultracode auto-orchestration behind a flag, using a
+  settings file (fixes PowerShell 5.1 quote-stripping on inline JSON).
+- **Test hook trust gate.** `FABLE_TEST_HOOK_ALLOW` restricts auto-execution to
+  trusted directory prefixes; `.fable-test` file pins the exact command per
+  project. The hook now skips when the edit itself failed, and GCs stale markers.
+- **Skill preservation on reinstall.** Bundled skills carry a `.fable-mode-bundled`
+  marker; a same-named user skill is backed up instead of overwritten.
+- **`test_content.py`** — test guard preventing dead personal references
+  (`~/Downloads/...`, measurement scripts) in shipped content.
+- **42 pytest tests** (up from 3), covering trigger, doctor, installer,
+  uninstaller round-trip, test-after-edit, launchers, and content guards.
+
 ### Changed — v2: native distillation replaces the leaked prompt
 - **`FABLE_CODE.md` is the new core.** An original distillation of Fable 5's
   actual Claude Code operating layer (final-message contract, outcome-first

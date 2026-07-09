@@ -16,9 +16,17 @@ import shutil
 
 
 def merge(settings_path, py, hooks_dir):
-    d = json.load(open(settings_path)) if os.path.exists(settings_path) else {}
     if os.path.exists(settings_path):
-        shutil.copy(settings_path, settings_path + ".bak")
+        with open(settings_path) as f:
+            d = json.load(f)
+        # Preserve the pristine pre-install settings exactly once. A naive
+        # copy-every-run would, on the second install, overwrite this backup with
+        # already-merged content — destroying the only good restore point.
+        backup = settings_path + ".bak"
+        if not os.path.exists(backup):
+            shutil.copy(settings_path, backup)
+    else:
+        d = {}
 
     d["alwaysThinkingEnabled"] = True
     hooks = d.setdefault("hooks", {})
@@ -32,6 +40,9 @@ def merge(settings_path, py, hooks_dir):
                    for e in arr for h in e.get("hooks", [])):
             arr.append(entry)
 
+    ensure("SessionStart",
+           {"hooks": [{"type": "command", "command": cmd("fable-trigger.py")}]},
+           "fable-trigger.py")
     ensure("UserPromptSubmit",
            {"hooks": [{"type": "command", "command": cmd("fable-trigger.py")}]},
            "fable-trigger.py")

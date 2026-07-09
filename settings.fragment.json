@@ -2,6 +2,13 @@
   "_comment": "Reference only. install.sh / install.ps1 merge these into ~/.claude/settings.json (with a backup) and write ABSOLUTE interpreter + script paths so the hooks work without $HOME/python3 resolution. If editing by hand, replace 'python3' with your interpreter (e.g. 'python' on Windows) and $HOME with the full path to your home dir.",
   "alwaysThinkingEnabled": true,
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/fable-trigger.py" }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [

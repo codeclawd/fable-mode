@@ -24,12 +24,28 @@ test command in the edited project's directory.
 
 Because the test hook runs a project's test command, **only enable fable-mode in
 repositories you trust** — the same caution you would apply to running their
-tests yourself.
+tests yourself. The command is derived from repo content (`package.json` scripts,
+a `Makefile` `test:` target, or a `.fable-test` file), so a hostile repository
+could point it at an arbitrary command; treat it exactly like running that repo's
+build yourself.
+
+### Restricting where it runs (the trust gate)
+
+Set `FABLE_TEST_HOOK_ALLOW` to an `os.pathsep`-separated list of directory
+prefixes (`:` on Unix, `;` on Windows). When it is set, the hook auto-runs **only**
+for projects at or under one of those roots and stays silent everywhere else — so
+editing a freshly-cloned, untrusted repo triggers nothing. When it is unset the
+default is zero-config (runs in any project), which is why the trust caution above
+applies.
 
 ### Turning the test hook off
 
 - Set `FABLE_NO_TEST_HOOK=1` to disable it entirely.
+- Set `FABLE_TEST_HOOK_ALLOW=<trusted dirs>` to restrict it to roots you trust.
 - Tune `FABLE_TEST_HOOK_DEBOUNCE` / `FABLE_TEST_HOOK_TIMEOUT` (seconds).
+- Drop a `.fable-test` file in a project root to pin the exact command it runs
+  (e.g. a fast, scoped subset instead of the whole suite). Note this file is repo
+  content, so it is governed by the same `FABLE_TEST_HOOK_ALLOW` gate.
 - Or remove the `PostToolUse` entry from `~/.claude/settings.json` — `uninstall.py`
   does this for you.
 
