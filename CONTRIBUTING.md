@@ -36,7 +36,8 @@ dependency-free so they run in any Claude Code environment without a pip install
 - **Don't fight line endings.** `.gitattributes` enforces LF for shell/Python and
   CRLF for PowerShell. Let it; `.editorconfig` matches.
 - **Leave vendored content alone.** The Anthropic skills under `skills/` and
-  `fable-system.md` are upstream copies — fix those upstream, not here.
+  `reference/fable-system-consumer.md` are upstream copies — fix those
+  upstream, not here.
 - Match the surrounding style and keep diffs focused.
 
 ## Pull requests

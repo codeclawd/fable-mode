@@ -35,7 +35,9 @@ def test_install_copies_everything(tmp_path):
     claude = tmp_path / ".claude"
 
     assert (claude / "FABLE_PLAYBOOK.md").is_file()
-    assert (claude / "fable-system.md").is_file()
+    assert (claude / "FABLE_CODE.md").is_file()
+    # the leaked consumer prompt is reference material only — never installed
+    assert not (claude / "fable-system.md").exists()
     assert (claude / "hooks" / "fable-trigger.py").is_file()
     assert (claude / "hooks" / "test-after-edit.py").is_file()
     assert (claude / "agents" / "grounding-verifier.md").is_file()

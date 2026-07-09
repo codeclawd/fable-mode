@@ -131,7 +131,8 @@ def main():
     rm_file(os.path.join(CLAUDE, "hooks", "fable-trigger.py"))
     rm_file(os.path.join(CLAUDE, "hooks", "test-after-edit.py"))
     rm_file(os.path.join(CLAUDE, "FABLE_PLAYBOOK.md"))
-    rm_file(os.path.join(CLAUDE, "fable-system.md"))
+    rm_file(os.path.join(CLAUDE, "FABLE_CODE.md"))
+    rm_file(os.path.join(CLAUDE, "fable-system.md"))  # pre-rename installs
     rm_file(os.path.join(CLAUDE, "agents", "grounding-verifier.md"))
     for name in bundled_skill_names():
         rm_tree(os.path.join(CLAUDE, "skills", name))

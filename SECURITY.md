@@ -35,8 +35,9 @@ tests yourself.
 
 ## Bundled third-party content
 
-`fable-system.md` is Anthropic's Claude Fable 5 system prompt, included only so
-setup is a single step. It is third-party content, not authored or audited here,
+`reference/fable-system-consumer.md` is Anthropic's leaked Claude Fable 5
+consumer system prompt, kept for reference/provenance only — it is never
+installed or injected. It is third-party content, not authored or audited here,
 and is removable on request. The skills under `skills/` (`webapp-testing`,
 `mcp-builder`, `skill-creator`, `explore-data`) are vendored from upstream
 Apache-2.0 repos. Treat all of it as untrusted-origin text.

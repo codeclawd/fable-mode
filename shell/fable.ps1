@@ -1,14 +1,24 @@
 # Fable mode launcher (PowerShell). Dot-source from your profile, or:
 #   . C:\path\to\fable-mode\shell\fable.ps1
 #
-# Launches Claude Code (Opus 4.8) with the Fable 5 system prompt appended and
+# Launches Claude Code (Opus 4.8) with FABLE_CODE.md — the native distillation
+# of Fable 5's Claude Code operating rules — appended to the system prompt, and
 # ultracode effort (sends xhigh to the model AND auto-orchestrates multi-agent
 # workflows for substantive tasks — the heaviest mode). ultracode is session-only,
-# so it's set via --settings, not --effort. It also trips fable-trigger.py, which
-# layers FABLE_PLAYBOOK execution discipline on top.
+# so it's set via --settings, not --effort.
 #
-# install.ps1 copies fable-system.md into ~\.claude for you.
+# NOT the leaked consumer prompt: that file (reference/fable-system-consumer.md)
+# is claude.ai-specific and actively conflicts with the Claude Code harness.
+# The distillation is what actually transfers.
+#
+# FABLE_CODE_APPENDED=1 tells fable-trigger.py the disposition layer is already
+# in the system prompt, so it only adds the FABLE_PLAYBOOK directive on top.
 # If ultracode's auto-workflows burn too many tokens, swap --settings for --effort xhigh.
 function fable {
-    claude --append-system-prompt-file "$HOME\.claude\fable-system.md" --settings '{"ultracode": true}' @args
+    $env:FABLE_CODE_APPENDED = "1"
+    try {
+        claude --append-system-prompt-file "$HOME\.claude\FABLE_CODE.md" --settings '{"ultracode": true}' @args
+    } finally {
+        Remove-Item Env:FABLE_CODE_APPENDED -ErrorAction SilentlyContinue
+    }
 }

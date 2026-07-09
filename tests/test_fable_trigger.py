@@ -1,4 +1,4 @@
-"""Tests for hooks/fable-trigger.py — the on-demand playbook injector."""
+"""Tests for hooks/fable-trigger.py — the two-layer Fable injector."""
 import json
 import os
 import subprocess
@@ -9,51 +9,137 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 HOOK = REPO / "hooks" / "fable-trigger.py"
 
+CODE_BODY = (
+    "# FABLE_CODE_MARKER_7\n\nrules here\n\n---\n\n"
+    "## Relationship to the rest of the bundle\n\nHUMAN_ONLY_TAIL\n"
+)
 
-def run(stdin_obj, home):
+
+def run(stdin_obj, home, tmpdir):
     env = dict(os.environ)
     env["HOME"] = str(home)          # expanduser on POSIX
     env["USERPROFILE"] = str(home)   # expanduser on Windows
+    env["TMPDIR"] = str(tmpdir)      # isolate session markers per test
+    env["TEMP"] = str(tmpdir)
+    env["TMP"] = str(tmpdir)
     env.pop("CLAUDE_EFFORT", None)   # effort is driven by the payload, not the dev's session
+    env.pop("FABLE_DISABLE", None)
     p = subprocess.run([sys.executable, str(HOOK)],
                        input=json.dumps(stdin_obj), text=True,
                        capture_output=True, env=env)
     return p.stdout.strip()
 
 
-def make_home(tmp_path, with_playbook=True):
+def make_home(tmp_path, with_playbook=True, with_code=True, with_harness=False):
     claude = tmp_path / ".claude"
     claude.mkdir(parents=True, exist_ok=True)
     if with_playbook:
         (claude / "FABLE_PLAYBOOK.md").write_text("PLAYBOOK_MARKER_42", encoding="utf-8")
+    if with_code:
+        (claude / "FABLE_CODE.md").write_text(CODE_BODY, encoding="utf-8")
+    if with_harness:
+        (claude / "docs").mkdir(exist_ok=True)
+        (claude / "docs" / "LOOP-HARNESS.md").write_text("harness", encoding="utf-8")
     return tmp_path
 
 
-def test_phrase_injects_playbook(tmp_path):
+def ctx_of(out):
+    return json.loads(out)["hookSpecificOutput"]["additionalContext"]
+
+
+def test_first_prompt_injects_code_layer(tmp_path):
     home = make_home(tmp_path)
-    out = run({"prompt": "please use fable here", "session_id": str(uuid.uuid4())}, home)
-    assert out, "phrase trigger should produce output"
-    ctx = json.loads(out)["hookSpecificOutput"]["additionalContext"]
-    assert "PLAYBOOK_MARKER_42" in ctx
+    out = run({"prompt": "hello world", "session_id": str(uuid.uuid4())}, home, tmp_path)
+    assert out, "first prompt should inject the FABLE_CODE layer"
+    ctx = ctx_of(out)
+    assert "FABLE_CODE_MARKER_7" in ctx
+    assert "HUMAN_ONLY_TAIL" not in ctx, "human-readers tail must be stripped"
 
 
-def test_no_phrase_low_effort_is_silent(tmp_path):
-    home = make_home(tmp_path)
-    assert run({"prompt": "hello world", "session_id": str(uuid.uuid4())}, home) == ""
-
-
-def test_effort_injects_once_per_session(tmp_path):
+def test_code_layer_once_per_session(tmp_path):
     home = make_home(tmp_path)
     sid = str(uuid.uuid4())
-    first = run({"prompt": "hi", "effort": "ultracode", "session_id": sid}, home)
-    second = run({"prompt": "hi", "effort": "ultracode", "session_id": sid}, home)
-    assert first, "first effort-only trigger should inject"
-    assert second == "", "same session should be debounced on the second prompt"
+    assert run({"prompt": "hi", "session_id": sid}, home, tmp_path)
+    assert run({"prompt": "hi again", "session_id": sid}, home, tmp_path) == ""
 
 
-def test_missing_playbook_is_silent(tmp_path):
-    home = make_home(tmp_path, with_playbook=False)
-    assert run({"prompt": "use fable", "session_id": str(uuid.uuid4())}, home) == ""
+def test_phrase_injects_playbook_directive_not_body(tmp_path):
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    run({"prompt": "hi", "session_id": sid}, home, tmp_path)  # consume layer 1
+    out = run({"prompt": "please use fable here", "session_id": sid}, home, tmp_path)
+    assert out, "phrase should trigger even after layer 1 fired"
+    ctx = ctx_of(out)
+    assert "FABLE_PLAYBOOK.md" in ctx, "directive must name the playbook path"
+    assert "PLAYBOOK_MARKER_42" not in ctx, "playbook body must NOT be inlined (10k cap)"
+
+
+def test_effort_directive_once_per_session(tmp_path):
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    first = run({"prompt": "hi", "effort": {"level": "xhigh"}, "session_id": sid}, home, tmp_path)
+    assert "FABLE_PLAYBOOK.md" in ctx_of(first)
+    second = run({"prompt": "hi", "effort": {"level": "xhigh"}, "session_id": sid}, home, tmp_path)
+    assert second == "", "effort path debounces after the first prompt"
+
+
+def test_effort_accepts_plain_string(tmp_path):
+    home = make_home(tmp_path)
+    out = run({"prompt": "hi", "effort": "ultracode",
+               "session_id": str(uuid.uuid4())}, home, tmp_path)
+    assert "FABLE_PLAYBOOK.md" in ctx_of(out)
+
+
+def test_user_prompt_field_name_also_works(tmp_path):
+    home = make_home(tmp_path)
+    sid = str(uuid.uuid4())
+    run({"prompt": "hi", "session_id": sid}, home, tmp_path)
+    out = run({"user_prompt": "use fable", "session_id": sid}, home, tmp_path)
+    assert out and "FABLE_PLAYBOOK.md" in ctx_of(out)
+
+
+def test_harness_bridge_line(tmp_path):
+    home = make_home(tmp_path, with_harness=True)
+    out = run({"prompt": "hi", "session_id": str(uuid.uuid4())}, home, tmp_path)
+    assert "LOOP-HARNESS.md" in ctx_of(out)
+
+
+def test_no_harness_no_bridge(tmp_path):
+    home = make_home(tmp_path, with_harness=False)
+    out = run({"prompt": "hi", "session_id": str(uuid.uuid4())}, home, tmp_path)
+    assert "LOOP-HARNESS.md" not in ctx_of(out)
+
+
+def test_context_stays_under_cap_with_real_files(tmp_path):
+    """The shipped FABLE_CODE.md (not a stub) must inject under the 10k cap."""
+    home = tmp_path
+    claude = home / ".claude"
+    (claude / "docs").mkdir(parents=True)
+    (claude / "FABLE_CODE.md").write_text(
+        (REPO / "FABLE_CODE.md").read_text(encoding="utf-8"), encoding="utf-8")
+    (claude / "FABLE_PLAYBOOK.md").write_text("x", encoding="utf-8")
+    (claude / "docs" / "LOOP-HARNESS.md").write_text("harness", encoding="utf-8")
+    out = run({"prompt": "use fable", "session_id": str(uuid.uuid4())}, home, tmp_path)
+    ctx = ctx_of(out)
+    assert len(ctx) <= 10000
+    assert "[truncated" not in ctx, "real files must fit without truncation"
+
+
+def test_missing_everything_is_silent(tmp_path):
+    home = make_home(tmp_path, with_playbook=False, with_code=False)
+    assert run({"prompt": "use fable", "session_id": str(uuid.uuid4())}, home, tmp_path) == ""
+
+
+def test_disable_env_var(tmp_path):
+    home = make_home(tmp_path)
+    env = dict(os.environ)
+    env["HOME"] = str(home)
+    env["USERPROFILE"] = str(home)
+    env["FABLE_DISABLE"] = "1"
+    p = subprocess.run([sys.executable, str(HOOK)],
+                       input=json.dumps({"prompt": "use fable", "session_id": "s"}),
+                       text=True, capture_output=True, env=env)
+    assert p.returncode == 0 and p.stdout.strip() == ""
 
 
 def test_malformed_input_never_crashes(tmp_path):

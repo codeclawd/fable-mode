@@ -95,11 +95,9 @@ def main():
     copy_into("hooks/fable-trigger.py", os.path.join(CLAUDE, "hooks"))
     copy_into("hooks/test-after-edit.py", os.path.join(CLAUDE, "hooks"))
 
-    print("-> playbook")
+    print("-> playbook + native distillation")
     copy_into("FABLE_PLAYBOOK.md", CLAUDE)
-
-    print("-> fable system prompt")
-    copy_into("fable-system.md", CLAUDE)
+    copy_into("FABLE_CODE.md", CLAUDE)
 
     print("-> skills (all bundled) + agent")
     skills_dir = os.path.join(REPO, "skills")
