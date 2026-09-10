@@ -5,8 +5,8 @@
 **Run Claude Fable 5 on Opus 4.8.**
 The Mythos-class model the U.S. government pulled after three days — brought back as a system prompt.
 
-![CI](https://github.com/HalalifyMusic/fable-mode/actions/workflows/ci.yml/badge.svg) &nbsp;
-![Stars](https://img.shields.io/github/stars/HalalifyMusic/fable-mode?style=social) &nbsp;
+![CI](https://github.com/codeclawd/fable-mode/actions/workflows/ci.yml/badge.svg) &nbsp;
+![Stars](https://img.shields.io/github/stars/codeclawd/fable-mode?style=social) &nbsp;
 ![License](https://img.shields.io/badge/license-MIT-blue) &nbsp;
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Opus%204.8-d97757) &nbsp;
 ![Fable 5 Lite](https://img.shields.io/badge/Fable%205-Lite-111111)
@@ -35,7 +35,7 @@ So v2 replaces the leaked prompt with **`FABLE_CODE.md`** — an original distil
 One installer, every OS — it's Python (already required by the hooks), so the same command works on Windows, macOS, and Linux:
 
 ```sh
-git clone https://github.com/HalalifyMusic/fable-mode
+git clone https://github.com/codeclawd/fable-mode
 cd fable-mode
 python install.py        # Windows  (use python3 on macOS / Linux)
 ```
@@ -89,7 +89,7 @@ This gives you Fable's *disposition*, not its raw capability. Reasoning depth, v
 
 ## Credits
 
-Made by HalalifyMusic — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work. Activation reliability improvements (`fable doctor`, dual-event SessionStart hooks, auto-activation heuristic, test-hook trust gate, skill preservation) adapted from [@denfry](https://github.com/denfry)'s [PR #3](https://github.com/HalalifyMusic/fable-mode/pull/3).
+Made by CodeClawd — compiled from community sources (leaked prompts, public Anthropic skills) and original measurement and tooling work. Activation reliability improvements (`fable doctor`, dual-event SessionStart hooks, auto-activation heuristic, test-hook trust gate, skill preservation) adapted from [@denfry](https://github.com/denfry)'s [PR #3](https://github.com/codeclawd/fable-mode/pull/3).
 
 ## Contributing
 

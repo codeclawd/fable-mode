@@ -6,7 +6,7 @@ conventions keep it that way.
 ## Development setup
 
 ```sh
-git clone https://github.com/HalalifyMusic/fable-mode
+git clone https://github.com/codeclawd/fable-mode
 cd fable-mode
 python -m pip install --upgrade pytest
 python -m pytest -q
