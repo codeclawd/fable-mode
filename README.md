@@ -89,7 +89,7 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 
 ## Pairs with loop-harness-system
 
-[loop-harness-system](https://github.com/HalalifyMusic/loop-harness-system) is the execution-discipline layer to this repo's behavior layer: contract-first building, fresh-context evaluation, crash-resumable 3-file state. When it's installed (`~/.claude/docs/LOOP-HARNESS.md` exists), `fable-trigger.py` adds a one-line bridge to every session pointing the model at it — fable-mode governs how each role *thinks and writes*, the harness governs how work is *structured and judged*.
+`loop-harness-system` is the execution-discipline layer to this repo's behavior layer: contract-first building, fresh-context evaluation, crash-resumable 3-file state. When it's installed (`~/.claude/docs/LOOP-HARNESS.md` exists), `fable-trigger.py` adds a one-line bridge to every session pointing the model at it — fable-mode governs how each role *thinks and writes*, the harness governs how work is *structured and judged*. The harness is not published yet — the bridge stays dormant until the file exists, so nothing here depends on it.
 
 ## The honest ceiling
 
