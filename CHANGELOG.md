@@ -6,6 +6,46 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed — v3: Fable 5.1 audit (2026-09-10)
+- **Launcher defaults to Fable 5.1.** `fable` runs `--model ${FABLE_MODEL:-claude-fable-5-1}`
+  (`$env:FABLE_MODEL` on PowerShell). Fable 5.1 is GA; the "you can't call the
+  model" premise in the README was stale. `FABLE_MODEL=claude-opus-4-8 fable`
+  keeps the Opus "Fable 5 Lite" path. Verified live: under `--model
+  claude-fable-5-1` the harness reports "You are powered by the model named
+  Fable 5.1"; print-mode `modelUsage.canonicalModel` shows `claude-opus-5`,
+  which is an accounting alias, not a fallback (the same probe under
+  `--model claude-opus-5` reports Opus 5 with a different knowledge cutoff).
+- **`FABLE_CODE.md` re-audited by Fable 5.1 against its own Claude Code
+  harness.** Added the rules the v2 distillation missed: scope discipline
+  (the requested scope is the deliverable; state a concern then keep building;
+  finish every unblocked part and say what was left out; a reaffirmed request
+  is the user's decision), the precise final-message rules (twenty-word
+  sentences, no em-dashes/parentheticals/arrow chains, numbers and code out of
+  prose, header and bullet limits, no closing offer), uncertainty-mid-task
+  ordering, the pending-subagent fabrication ban, they/them default, and
+  plain one-sentence refusals. The injectable half is under 9k chars and contains
+  zero em-dashes, so the file follows its own writing rule.
+- `/ground`: preference forks use AskUserQuestion in an interactive session
+  (the old "never AskUserQuestion" contradicted the harness); headless runs
+  write the fork into the report and stop.
+- `/fable`, `grounding-verifier`, playbook header: Fable 5.1 host notes; the
+  verifier's report contract (final message goes to the caller, no preamble).
+- `claude-design-patterns`: Claude Artifacts block unpkg by CSP; use cdnjs.
+
+### Fixed
+- **`shell/fable.ps1` was unrunnable on Windows since f3d5524.** A bad CRLF
+  conversion left every line ending in the literal two-byte text `\r` before
+  the real CRLF, so the backtick line-continuations escaped a backslash instead
+  of continuing the line and `claude --model …` ran as orphaned statements.
+  Stripped, with a content test that fails on the same shape in any `.ps1`.
+- `fable-trigger.py` marker GC never pruned anything: the glob was `fable-*-`
+  (names ending in a dash) while markers are `fable-<kind>-<sid>`. Now
+  `fable-code-*` + `fable-playbook-*` (this hook's own kinds only, so an
+  unrelated week-old `/tmp/fable-notes.txt` is never deleted), with a regression test.
+- New test guards the shipped `FABLE_CODE.md` under the hook cap in the real
+  worst case (preamble + loop-harness bridge + playbook directive together);
+  the directive itself lost its plumbing sentence to make room.
+
 ### Added — activation reliability (from @denfry, PR #3, adapted)
 - **`fable doctor`** — one command that verifies the whole install/activation
   chain: files present, hooks registered (settings.json + settings.local.json),

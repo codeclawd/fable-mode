@@ -116,7 +116,9 @@ def prune_stale_markers():
     """Best-effort GC: week-old markers belong to dead sessions.
     Windows never clears %TEMP%, so without this they accumulate forever."""
     cutoff = time.time() - 7 * 86400
-    for p in glob.glob(os.path.join(tempfile.gettempdir(), "fable-*-")):
+    tmp = tempfile.gettempdir()
+    for p in (glob.glob(os.path.join(tmp, "fable-code-*"))
+              + glob.glob(os.path.join(tmp, "fable-playbook-*"))):
         try:
             if os.path.getmtime(p) < cutoff:
                 os.remove(p)
@@ -167,8 +169,7 @@ def playbook_directive(why):
         return None
     return ("Fable heavy mode ({}): before other work, Read "
             "{} with the Read tool and adopt it as standing "
-            "discipline for the rest of this session. It is ~21 KB — too "
-            "large to inject inline here — so reading it yourself is the "
+            "discipline for the rest of this session. Reading it is the "
             "load, not an optional reference.".format(why, PLAYBOOK))
 
 

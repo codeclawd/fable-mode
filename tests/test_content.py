@@ -23,3 +23,12 @@ def test_fable_skill_fallback_is_reachable():
     text = (REPO / "skills" / "fable" / "SKILL.md").read_text(encoding="utf-8")
     assert "this skill's repository" not in text
     assert "fable doctor" in text
+
+
+def test_powershell_launcher_has_no_literal_backslash_r():
+    """A bad CRLF conversion once left every line of fable.ps1 ending in the
+    two-byte text `\\r` before the real CRLF, which turns the backtick
+    line-continuations into escaped backslashes and breaks the function."""
+    for name in ("shell/fable.ps1", "install.ps1", "uninstall.ps1"):
+        raw = (REPO / name).read_bytes()
+        assert b"\\r\r\n" not in raw, "%s has literal backslash-r before CRLF" % name

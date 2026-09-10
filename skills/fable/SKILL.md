@@ -27,6 +27,10 @@ If the playbook is already in this context (look for a "Fable mode active"
 injection from the hook), skip the reads: confirm activation in one line and
 apply `FABLE_CODE.md` from context, reading it only if absent.
 
+The playbook's numbers were measured on Fable 5 traces. Running as Fable 5.1
+does not exempt you: its weak spots (test-after-edit, communication floor,
+parallelism) are inherited until re-measured, and the hooks enforce them anyway.
+
 Scale the heavier machinery to the task: the evidence ledger and the
 `grounding-verifier` agent are for non-trivial or hard-to-reverse work, not for
 typo fixes (the playbook's own calibration rules apply).

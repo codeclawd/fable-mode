@@ -1,4 +1,4 @@
-# Execution Playbook — Fable-5 patterns for Opus 4.8 (measured companion)
+# Execution Playbook — Fable-5 patterns, measured (companion to FABLE_CODE.md)
 
 > Read with **`FABLE_CODE.md`** — the native distillation of Fable's actual
 > Claude Code operating rules. This file supplies the measured numbers; that one
@@ -14,6 +14,10 @@ is backed by a number — and it is honest about where the gap was smaller than
 it first looked.
 
 Measured: 1,307 fable-5 turns vs 10,470 opus-4-8 turns across 139 / 243 sessions.
+The host model no longer matters for the rules: the launcher now runs Fable 5.1
+itself by default, and the weak spots below (verification, communication,
+parallelism) are Fable-family habits, unmeasured on 5.1 and enforced by hook
+regardless of which model is serving.
 The measurement tooling is not part of this bundle; the numbers are the deliverable.
 
 ---

@@ -51,8 +51,10 @@ For each fork the grounding surfaces, classify:
   the development trajectory. → **Decide it.** Write *decision + grounded reasoning + rejected
   alternative(s)* into a decision log. Do not ask.
 - **Preference / value** — needs the user's priorities, risk tolerance, or product direction; or
-  is irreversible *and* expensive. → **Stop and surface it** inline (markdown list, never
-  AskUserQuestion) with a grounded recommendation.
+  is irreversible *and* expensive. → **Stop and surface it** with a grounded recommendation first. In an
+  interactive session use AskUserQuestion (it is built for a decision that is genuinely the
+  user's). In a headless or subagent run there is nobody to answer: write the fork and your
+  recommendation into the report and stop; never ask into the void.
 - **Unsure which class** → treat as preference and surface. Conservative on purpose.
 
 The bar: ask only what the code genuinely cannot answer.

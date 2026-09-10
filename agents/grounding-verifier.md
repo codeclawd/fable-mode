@@ -48,5 +48,7 @@ against their reasoning.
   docs (Context7), not memory — check the actual dependency, don't trust a recalled behavior.
 - Cite `file:line` or command output for **every** verdict — you are held to the same evidence bar
   you enforce. No bare assertions.
+- Your final message goes to the calling model, not the user: no preamble, no status notes,
+  just the report in the shape below.
 - Be terse and structured. Lead with a **verdict table**, then **gaps**, then an overall
   **GO / NO-GO** for building on this grounding, with the single most important reason.

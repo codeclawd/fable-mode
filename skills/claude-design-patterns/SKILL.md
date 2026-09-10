@@ -26,6 +26,10 @@ don't hardcode stale ones:
   integrity="sha384-…" crossorigin="anonymous"></script>
 ```
 
+Claude Artifacts (claude.ai / Claude Code `Artifact` tool) enforce a CSP that blocks unpkg
+and esm.sh: there, load scripts from `https://cdnjs.cloudflare.com` (or `cdn.jsdelivr.net/npm/`)
+with the UMD build and an exact version, and inline everything else.
+
 ## Style-object collision rule
 
 Global-scoped style objects MUST have unique, specific names per component — a bare

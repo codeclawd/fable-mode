@@ -273,3 +273,37 @@ def test_malformed_input_never_crashes(tmp_path):
                        text=True, capture_output=True, env=env)
     assert p.returncode == 0
     assert p.stdout.strip() == ""
+
+
+def test_stale_trigger_markers_are_pruned(tmp_path):
+    """The GC glob used to be 'fable-*-', which only matches names ENDING in a
+    dash; real markers are 'fable-<kind>-<sid>', so nothing was ever pruned."""
+    home = make_home(tmp_path)
+    tmpdir = tmp_path / "tmp"
+    tmpdir.mkdir()
+    stale = tmpdir / "fable-playbook-deadsession"
+    stale.write_text("", encoding="utf-8")
+    old = 1  # epoch: unambiguously older than the 7-day cutoff
+    os.utime(stale, (old, old))
+    run({"hook_event_name": "UserPromptSubmit", "session_id": uuid.uuid4().hex,
+         "prompt": "hi"}, home, tmpdir)
+    assert not stale.exists(), "week-old trigger markers should be pruned"
+
+
+def test_shipped_code_rules_fit_under_hook_cap():
+    """The real FABLE_CODE.md, plus the injection preamble AND the optional
+    loop-harness bridge line, must fit under CAP; otherwise emit() truncates
+    the disposition mid-rule on every user's first prompt."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("fable_trigger", HOOK)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    mod.CODE = str(REPO / "FABLE_CODE.md")
+    mod.HARNESS = str(HOOK)  # any existing file: forces the bridge line on
+    mod.PLAYBOOK = str(REPO / "FABLE_PLAYBOOK.md")  # directive fires alongside on "use fable"
+    block = mod.code_rules_block()
+    directive = mod.playbook_directive("trigger phrase")
+    assert block and directive
+    worst = len(block) + 2 + len(directive)
+    assert worst <= mod.CAP, "rules+bridge+directive is %d chars; CAP is %d" % (worst, mod.CAP)
+    assert "—" not in mod.read_code_rules(), "FABLE_CODE.md must follow its own no-em-dash rule"

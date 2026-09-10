@@ -2,8 +2,8 @@
 
 # fable-mode
 
-**Run Claude Fable 5 on Opus 4.8.**
-The Mythos-class model the U.S. government pulled after three days — brought back as a system prompt.
+**Fable-shaped sessions without Fable's usage bill.**
+Fable 5.1's Claude Code operating layer, distilled and hook-enforced, so Opus 4.8 or Sonnet 5 work the way Fable works. Runs on Fable 5.1 too, when the task earns it.
 
 ![CI](https://github.com/codeclawd/fable-mode/actions/workflows/ci.yml/badge.svg) &nbsp;
 ![Stars](https://img.shields.io/github/stars/codeclawd/fable-mode?style=social) &nbsp;
@@ -14,7 +14,7 @@ The Mythos-class model the U.S. government pulled after three days — brought b
 One clone, one install: a native distillation of **how Fable 5 actually operates inside Claude Code** + a measured execution playbook + verification hooks + design and agent skills — wired into Claude Code. (The leaked consumer prompt lives on in `reference/`, but it's no longer what gets loaded — see below for why.)
 
 <img src="docs/before-after.png" alt="Same brief, same model (Opus 4.8) — stock output vs. Opus 4.8 in fable-mode" width="100%">
-<sub>Same brief, same model. Left: stock Opus 4.8. Right: Opus 4.8 in fable-mode.</sub>
+<sub>Same brief, same model. Left: stock Opus 4.8. Right: Opus 4.8 in fable-mode (the v2 capture; the layer now targets Fable 5.1 by default).</sub>
 
 </div>
 
@@ -22,13 +22,25 @@ One clone, one install: a native distillation of **how Fable 5 actually operates
 
 ## Why this exists
 
-Claude Fable 5 shipped on June 9, 2026 as Anthropic's first Mythos-class model — and was suspended on June 12 under a U.S. export-control directive. You can't call the model right now.
+Claude Fable 5 shipped on June 9, 2026 as Anthropic's first Mythos-class model, was suspended on June 12 under a U.S. export-control directive, and came back. **Fable 5.1 is generally available now** (`claude --model claude-fable-5-1`).
 
-But when its system prompt leaked, people noticed: a lot of what made Fable *feel* different — its taste, its directness, its tool-use instincts — lived in the prompt, not only the weights. Run that prompt on Opus 4.8 and the output changes character. The community calls it **Fable 5 Lite**.
+So why keep a "Fable 5 Lite"? Usage. A Fable 5.1 session drains a Max or Pro plan's usage budget far faster than Opus 4.8 or Sonnet 5 does. Most of your day is not Mythos-class work, and the part of Fable that makes routine coding sessions feel different is its operating discipline, not its raw capability: outcome-first summaries, act-don't-ask autonomy, evidence before every state change, a real test after every edit. That discipline is text, and text runs on any model. This bundle puts it on Opus or Sonnet so you spend Fable 5.1 on the hard hours and still get Fable-shaped sessions in the cheap ones.
+
+Three ways to run it:
+
+```sh
+fable                                   # Fable 5.1, discipline reinforced and hook-enforced
+FABLE_MODEL=claude-opus-4-8 fable       # Opus 4.8 with the Fable layer: "Fable 5 Lite"
+FABLE_MODEL=claude-sonnet-5 fable       # Sonnet 5 with the Fable layer: cheapest Fable-shaped session
+```
+
+The hooks are the part that holds up across models. Fable's own measured weak spots (test-after-edit, communication floor, parallelism) are Fable-family habits; the bundle enforces them mechanically whichever model serves.
+
+When the Fable 5 system prompt leaked, people noticed: a lot of what made Fable *feel* different — its taste, its directness, its tool-use instincts — lived in the prompt, not only the weights. Run that prompt on Opus 4.8 and the output changes character. The community calls it **Fable 5 Lite**.
 
 There was a catch, though: the leaked prompt is Fable's *consumer chat* prompt. It governs claude.ai — artifacts, web-search etiquette, copyright limits, a Linux VM at `/mnt` — and almost none of that exists in Claude Code. Appending it to a terminal session spends ~42k tokens teaching the model rules for an environment it isn't in, some of which conflict outright with the Claude Code harness. Fable-in-Claude-Code runs on a *different* prompt entirely: outcome-first communication, autonomous-turn discipline, evidence-before-state-change, irreversibility-scaled reasoning.
 
-So v2 replaces the leaked prompt with **`FABLE_CODE.md`** — an original distillation of that agentic layer, written against the real Claude Code Fable harness — plus the part no prompt can give you: measured discipline and verification, enforced by hooks.
+So v2 replaces the leaked prompt with **`FABLE_CODE.md`** — an original distillation of that agentic layer, written against the real Claude Code Fable harness — plus the part no prompt can give you: measured discipline and verification, enforced by hooks. v3 (2026-09-10) was re-audited by Fable 5.1 against its own harness: scope discipline, the precise writing rules, subagent hygiene, and the launcher now defaults to Fable 5.1.
 
 ## Quickstart
 
@@ -43,7 +55,8 @@ python install.py        # Windows  (use python3 on macOS / Linux)
 Then reload your shell and launch:
 
 ```sh
-fable        # Opus 4.8 + FABLE_CODE.md + ultracode
+fable                                  # Fable 5.1 + FABLE_CODE.md + xhigh effort
+FABLE_MODEL=claude-opus-4-8 fable      # same layer on Opus 4.8 (see "Why this exists" for Sonnet too)
 ```
 
 Prefer a native one-liner? `./install.sh` (macOS / Linux) and `.\install.ps1` (Windows) just locate Python and run `install.py` for you.
@@ -52,7 +65,7 @@ Prefer a native one-liner? `./install.sh` (macOS / Linux) and `.\install.ps1` (W
 
 > **Requirements:** Python on PATH (`python --version`) for the hooks, and Claude Code installed for the `fable` launcher. On Windows, if `.\install.ps1` is blocked by execution policy, run `python install.py` directly (no policy needed).
 
-The installer copies everything into `~/.claude`, adds the `fable` launcher (to your shell rc on Unix, to your PowerShell `$PROFILE` on Windows), and merges your settings (with a backup) — writing the absolute interpreter and hook paths so the hooks fire on every platform. Idempotent: safe to re-run. Needs Python ≥ 3.9 (the hooks are stdlib-only — no pip installs). No model switch, no API key — it runs on the Opus 4.8 you already have.
+The installer copies everything into `~/.claude`, adds the `fable` launcher (to your shell rc on Unix, to your PowerShell `$PROFILE` on Windows), and merges your settings (with a backup) — writing the absolute interpreter and hook paths so the hooks fire on every platform. Idempotent: safe to re-run. Needs Python ≥ 3.9 (the hooks are stdlib-only — no pip installs). No API key — it runs on whatever Claude Code model your plan already serves (`FABLE_MODEL` picks it; default `claude-fable-5-1`).
 
 ## Uninstall
 
@@ -72,7 +85,7 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 - **`/fable` skill** — explicit mid-session activation: reads the playbook + behavior layer and adopts both, no launcher required.
 - **`/ground` skill + `grounding-verifier` agent** — a self-terminating grounding loop and a cold verifier that assumes every claim is wrong until the live code proves it.
 - **Skills** — `fable` (activation), `claude-design-patterns` (web-UI engineering), `webapp-testing`, `mcp-builder`, `skill-creator`, `explore-data`.
-- **`fable` launcher** — pins `--model claude-opus-4-8`, appends `FABLE_CODE.md`, sets `xhigh` effort, and declares the mode via `FABLE_MODE=1` so the playbook injects at session start on every Claude Code version (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). `fable --ultra` adds ultracode multi-agent orchestration; `fable doctor` verifies the install.
+- **`fable` launcher** — runs `--model ${FABLE_MODEL:-claude-fable-5-1}`, appends `FABLE_CODE.md`, sets `xhigh` effort, and declares the mode via `FABLE_MODE=1` so the playbook injects at session start on every Claude Code version (`fable.zsh` for Unix shells, `fable.ps1` for PowerShell). `fable --ultra` adds ultracode multi-agent orchestration; `fable doctor` verifies the install.
 
 ## Pairs with loop-harness-system
 
@@ -80,7 +93,7 @@ Removes the bundled files from `~/.claude`, strips the `fable` launcher line, an
 
 ## The honest ceiling
 
-This gives you Fable's *disposition*, not its raw capability. Reasoning depth, vision, long-horizon autonomy, and design intuition are weights-bound — only partly reachable by instruction. What transfers well: voice, formatting, grounding and verification, design patterns, effort configuration. On verification, parallelism, and communication it actually beats Fable, because those are enforced by hooks instead of left to intention.
+On Opus 4.8 this gives you Fable's *disposition*, not its raw capability. Reasoning depth, vision, long-horizon autonomy, and design intuition are weights-bound — only partly reachable by instruction. On Fable 5.1 the weights are real and the bundle is a reinforcement plus enforcement layer; the playbook's numbers were measured on Fable 5 traces and have not been re-measured on 5.1. What transfers well: voice, formatting, grounding and verification, design patterns, effort configuration. On verification, parallelism, and communication it actually beats Fable, because those are enforced by hooks instead of left to intention.
 
 ## About the bundled pieces
 

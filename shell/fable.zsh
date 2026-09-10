@@ -2,10 +2,10 @@
 # and sources it from your shell rc, so the cloned repo can be moved or deleted
 # after install. Manual use: `source ~/.claude/shell/fable.zsh`
 #
-# `fable`          Claude Code pinned to Opus 4.8, FABLE_CODE.md (native Claude
-#                  Code distillation) appended, xhigh effort, FABLE_MODE=1
-#                  declared so fable-trigger.py injects the playbook at
-#                  SessionStart.
+# `fable`          Claude Code on Fable 5.1 (override: FABLE_MODEL=claude-opus-4-8
+#                  fable), FABLE_CODE.md (native Claude Code distillation)
+#                  appended, xhigh effort, FABLE_MODE=1 declared so
+#                  fable-trigger.py injects the playbook at SessionStart.
 # `fable --ultra`  Same, plus ultracode: the harness auto-runs multi-agent
 #                  workflows for substantive tasks (heavy on tokens).
 # `fable doctor`   Verify the whole install/activation chain mechanically.
@@ -23,7 +23,7 @@ fable() {
     # across shells (issue #2). A path survives quoting everywhere.
     extra=(--settings "$HOME/.claude/shell/ultracode.settings.json")
   fi
-  FABLE_MODE=1 claude --model claude-opus-4-8 \
+  FABLE_MODE=1 claude --model "${FABLE_MODEL:-claude-fable-5-1}" \
     --append-system-prompt-file "$HOME/.claude/FABLE_CODE.md" \
     --effort xhigh "${extra[@]}" "$@"
 }
